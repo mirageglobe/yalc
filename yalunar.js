@@ -395,8 +395,6 @@
     this.lunarMonth = cmonthName[lMonth - 1]
     this.lunarYear = getAnimalYear(lYear)
 
-    // this.color      = ''
-
     this.lunarFestival = '' // 农历节日
     this.solarFestival = '' // 公历节日
     this.solarTerms = '' // 节气
@@ -530,6 +528,45 @@
     return that
   }
 
+  // ************************************************************
+  // * main example
+  // ************************************************************
+
+  // Date(yyyy, mm, dd, hh, mm, ss) where month mm jan = 0, feb = 1, ...
+  // 2021, 11, 28, 2, 0, 0
+
+  // const greDate = '2021-01-01 18:30:35'
+  const greDate = '1980-03-21 23:30:35'
+  console.log(greDate.toString())
+
+  const yalunar = new Lune()
+  const calDate = yalunar.solar2lunar(new Date(greDate.toString()))
+
+  // let calDate = lalune.lunar2solar(new Date(2011, 0, 3))
+  // 2010,11,29
+
+  // let calDate = lalune.solar2lunar(new Date(2010, 10, 29))
+  // 2011, 1, 3
+
+  // 农历转公历时，如果那一月是那一年的闰月，则需额外传一个参数，才能得到正确的公历日期
+  // let calDate = lalune.solar2lunar(new Date(2012, 4, 27))
+  // 2012年4月初7, 其中 isLeap为true，表示为闰四月
+
+  // let calDate = lalune.lunar2solar(new Date(2012, 3, 7))
+  // 得到错误时间：2012, 4, 27
+
+  // let calDate = lalune.lunar2solar(new Date(2012, 3, 7), true)
+  // 正确: 2012, 5, 27
+
+  console.log('lunar-day : ' + calDate.lunarDay + ' ' + calDate.cDay)
+  console.log('lunar-month : ' + calDate.lunarMonth + ' ' + calDate.cMonth)
+  console.log('lunar-year : ' + calDate.lunarYear + ' ' + calDate.cYear)
+  console.log('lunar-festival : ' + calDate.lunarFestival)
+  console.log('solar-day : ' + calDate.sDay)
+  console.log('solar-month : ' + calDate.sMonth)
+  console.log('solar-year : ' + calDate.sYear)
+  console.log('solar-festival : ' + calDate.solarFestival)
+
   /*
    * example:
    * let lalune = new Lune()
@@ -563,39 +600,4 @@
    *    , week: "日"                // 周几
    *  }
    */
-
-  // Date(yyyy, mm, dd, hh, mm, ss) where month mm jan = 0, feb = 1, ...
-  // 2021, 11, 28, 2, 0, 0
-
-  const greDate = '2021-01-01 18:30:35'
-  // const greDate = '1980-03-21 23:30:35'
-  console.log(greDate.toString())
-
-  const lalune = new Lune()
-  const calDate = lalune.solar2lunar(new Date(greDate.toString()))
-
-  // let calDate = lalune.lunar2solar(new Date(2011, 0, 3))
-  // 2010,11,29
-
-  // let calDate = lalune.solar2lunar(new Date(2010, 10, 29))
-  // 2011, 1, 3
-
-  // 农历转公历时，如果那一月是那一年的闰月，则需额外传一个参数，才能得到正确的公历日期
-  // let calDate = lalune.solar2lunar(new Date(2012, 4, 27))
-  // 2012年4月初7, 其中 isLeap为true，表示为闰四月
-
-  // let calDate = lalune.lunar2solar(new Date(2012, 3, 7))
-  // 得到错误时间：2012, 4, 27
-
-  // let calDate = lalune.lunar2solar(new Date(2012, 3, 7), true)
-  // 正确: 2012, 5, 27
-
-  console.log('lunar-day : ' + calDate.lunarDay)
-  console.log('lunar-month : ' + calDate.lunarMonth)
-  console.log('lunar-year : ' + calDate.lunarYear)
-  console.log('lunar-festival : ' + calDate.lunarFestival)
-  console.log('solar-day : ' + calDate.sDay)
-  console.log('solar-month : ' + calDate.sMonth)
-  console.log('solar-year : ' + calDate.sYear)
-  console.log('solar-festival : ' + calDate.solarFestival)
 })()

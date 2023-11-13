@@ -5,15 +5,14 @@
 
 // # ============================================================ example ===== #
 
-const lunar = require('./lunar.js')
+const {yalunar} = require('./yalunar.js')
 const greDate = '2021-01-01 18:30:35'
 
-// const greDate = '1980-03-21 23:30:35'
 console.log(greDate.toString())
 
 console.log('lunar-day : ' + lunar.calDate)
 
-const calDate = lunar.solar2lunar(new Date(greDate.toString()))
+// const calDate = lunar.solar2lunar(new Date(greDate.toString()))
 
 // let calDate = lalune.lunar2solar(new Date(2011, 0, 3))
 // 2010,11,29
