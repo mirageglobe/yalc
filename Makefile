@@ -75,7 +75,7 @@ readme:													## show information and notes
 
 run: 														## run project
 	$(call func_print_header,"run")
-	node lunar.js
+	node yalunar.js
 
 show-dist: 											## open dist folder on mac
 	$(call func_print_header,"build")
