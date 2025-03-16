@@ -1,4 +1,4 @@
-# lunar
+# yet another lunar calendar
 
 maintainer: jimmy lim <mirageglobe@gmail.com>
 
