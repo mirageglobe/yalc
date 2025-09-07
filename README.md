@@ -24,54 +24,23 @@ npx ava --watch
 there is an issue if time is between 23:00:00 - 01:00:00, it time of rat which means day+1
 ```
 
-## lunar-calendar
+## todo
 
-there is a recommended lunar calendar lunar javascript <https://github.com/6tail/lunar-javascript>
-
-the following example is for `lunar-javascript`
-
-```html
-demo.html
-
-<script src="lunar.js"></script>
-<script>
-  // 当前日期生成农历对象
-  var date = Lunar.fromDate(new Date());
-  document.write(date.toFullString());
-  document.write('<br>');
-  // 转阳历
-  document.write(date.getSolar().toFullString());
-  document.write('<br><br>');
-
-  // 指定日期生成农历对象
-  // var date = Lunar.fromDate(new Date(2021-12-28));
-  // note month starts from 0 .. therefore 0 is jan - 11 is dec
-  var testdate = new Date(1950, 4, 19, 20, 30, 0);
-  var date = Lunar.fromDate(testdate);
-  document.write(date.toFullString());
-  document.write('<br><br><br><br>');
-  document.write(testdate);
-  // 转阳历
-  document.write(date.getSolar().toFullString());
-</script>
-```
+- code - test nodejs built in test runner
+- [x] code - investigate using commonjs (nodejs format) or es6 as lunar.js cannot be added 
+- [x] code - investigate and describe how lunarinfo is used
+- [x] code - setup basic ava test
+- [x] code - test and select <https://github.com/cucumber/cucumber-js> or <https://github.com/avajs/ava>
 
 ## functional programming
 
 the benefits of functional programming are :
-- Easier Testing
-- Better Composability
-- Predictable Behavior
-- Easier to Reason About
-- Better for Functional Programming Patterns
 
-## todo
-
-- [] investigate using commonjs (nodejs format) or es6 as lunar.js cannot be
-  added 
-- [x] investigate and describe how lunarinfo is used
-- [x] setup basic ava test
-- [x] test and select <https://github.com/cucumber/cucumber-js> or <https://github.com/avajs/ava>
+- easier testing
+- better composability
+- predictable behavior
+- easier to reason about
+- better for functional programming patterns
 
 ## reference
 
