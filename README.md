@@ -35,15 +35,15 @@ demo.html
 
 <script src="lunar.js"></script>
 <script>
-  //当前日期生成农历对象
+  // 当前日期生成农历对象
   var date = Lunar.fromDate(new Date());
   document.write(date.toFullString());
   document.write('<br>');
-  //转阳历
+  // 转阳历
   document.write(date.getSolar().toFullString());
   document.write('<br><br>');
 
-  //指定日期生成农历对象
+  // 指定日期生成农历对象
   // var date = Lunar.fromDate(new Date(2021-12-28));
   // note month starts from 0 .. therefore 0 is jan - 11 is dec
   var testdate = new Date(1950, 4, 19, 20, 30, 0);
@@ -51,12 +51,21 @@ demo.html
   document.write(date.toFullString());
   document.write('<br><br><br><br>');
   document.write(testdate);
-  //转阳历
+  // 转阳历
   document.write(date.getSolar().toFullString());
 </script>
 ```
 
-## to do
+## functional programming
+
+the benefits of functional programming are :
+- Easier Testing
+- Better Composability
+- Predictable Behavior
+- Easier to Reason About
+- Better for Functional Programming Patterns
+
+## todo
 
 - [] investigate using commonjs (nodejs format) or es6 as lunar.js cannot be
   added 
