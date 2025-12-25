@@ -8,7 +8,7 @@ yet another lunar calendar conversion is a lunar to solar conversion in javascri
 
 ```bash
 # run with node
-node yalunar.js
+node yalc.js
 
 # test with ava
 npx ava
