@@ -7,6 +7,20 @@
 
 // ===== CONSTANTS =====
 
+/**
+ * Lunar calendar information for years 1900-2049
+ * 
+ * Each hexadecimal value encodes lunar year information:
+ * - Bits 1-4: Leap month (0 = no leap month, 1-12 = which month)
+ * - Bits 5-16: Month sizes (1 = 30 days, 0 = 29 days) from month 12 to 1
+ * - Bit 17: Leap month size (1 = 30 days, 0 = 29 days)
+ * 
+ * Example: 0x095b0 for year 1980
+ * Binary: 0000 1001 0101 1011 0000
+ * - Bits 1-4 (0000): No leap month
+ * - Bits 5-16: Month sizes from Dec to Jan
+ * - Days: 30, 29, 29, 30, 29, 30, 29, 30, 30, 29, 30, 30
+ */
 const LUNAR_INFO = [
   0x04bd8, 0x04ae0, 0x0a570, 0x054d5, 0x0d260, 0x0d950, 0x16554, 0x056a0, 0x09ad0, 0x055d2,
   0x04ae0, 0x0a5b6, 0x0a4d0, 0x0d250, 0x1d255, 0x0b540, 0x0d6a0, 0x0ada2, 0x095b0, 0x14977,
@@ -25,26 +39,42 @@ const LUNAR_INFO = [
   0x0b5a0, 0x056d0, 0x055b2, 0x049b0, 0x0a577, 0x0a4b0, 0x0aa50, 0x1b255, 0x06d20, 0x0ada0
 ];
 
+// Heavenly Stems (天干) - Used in stem-branch calendar system
 const HEAVENLY_STEMS = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+
+// Earthly Branches (地支) - Used in stem-branch calendar and time periods
 const EARTHLY_BRANCHES = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+
+// Chinese Zodiac Animals - 12-year cycle
 const ZODIAC_ANIMALS = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
+
+// Chinese numerals for days and dates
 const DAY_NAMES = ['日', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
-const DAY_PREFIXES = ['初', '十', '廿', '卅'];
+const DAY_PREFIXES = ['初', '十', '廿', '卅']; // First, Ten, Twenty, Thirty
+
+// Traditional Chinese month names
 const MONTH_NAMES = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '腊'];
 
+/**
+ * Traditional Chinese Time Periods (时辰)
+ * 
+ * Ancient Chinese divided the day into 12 periods of 2 hours each,
+ * corresponding to the 12 Earthly Branches and zodiac animals.
+ * Note: 子时 (23:00-01:00) spans midnight and belongs to the next day
+ */
 const TIME_PERIODS = [
-  { name: '子时', zodiac: '鼠', startHour: 23, endHour: 1, dayOffset: 1, branch: '子' },
-  { name: '丑时', zodiac: '牛', startHour: 1, endHour: 3, dayOffset: 0, branch: '丑' },
-  { name: '寅时', zodiac: '虎', startHour: 3, endHour: 5, dayOffset: 0, branch: '寅' },
-  { name: '卯时', zodiac: '兔', startHour: 5, endHour: 7, dayOffset: 0, branch: '卯' },
-  { name: '辰时', zodiac: '龙', startHour: 7, endHour: 9, dayOffset: 0, branch: '辰' },
-  { name: '巳时', zodiac: '蛇', startHour: 9, endHour: 11, dayOffset: 0, branch: '巳' },
-  { name: '午时', zodiac: '马', startHour: 11, endHour: 13, dayOffset: 0, branch: '午' },
-  { name: '未时', zodiac: '羊', startHour: 13, endHour: 15, dayOffset: 0, branch: '未' },
-  { name: '申时', zodiac: '猴', startHour: 15, endHour: 17, dayOffset: 0, branch: '申' },
-  { name: '酉时', zodiac: '鸡', startHour: 17, endHour: 19, dayOffset: 0, branch: '酉' },
-  { name: '戌时', zodiac: '狗', startHour: 19, endHour: 21, dayOffset: 0, branch: '戌' },
-  { name: '亥时', zodiac: '猪', startHour: 21, endHour: 23, dayOffset: 0, branch: '亥' }
+  { name: '子时', zodiac: '鼠', startHour: 23, endHour: 1, dayOffset: 1, branch: '子' },  // Rat: 11pm-1am
+  { name: '丑时', zodiac: '牛', startHour: 1, endHour: 3, dayOffset: 0, branch: '丑' },   // Ox: 1am-3am
+  { name: '寅时', zodiac: '虎', startHour: 3, endHour: 5, dayOffset: 0, branch: '寅' },   // Tiger: 3am-5am
+  { name: '卯时', zodiac: '兔', startHour: 5, endHour: 7, dayOffset: 0, branch: '卯' },   // Rabbit: 5am-7am
+  { name: '辰时', zodiac: '龙', startHour: 7, endHour: 9, dayOffset: 0, branch: '辰' },   // Dragon: 7am-9am
+  { name: '巳时', zodiac: '蛇', startHour: 9, endHour: 11, dayOffset: 0, branch: '巳' },  // Snake: 9am-11am
+  { name: '午时', zodiac: '马', startHour: 11, endHour: 13, dayOffset: 0, branch: '午' }, // Horse: 11am-1pm
+  { name: '未时', zodiac: '羊', startHour: 13, endHour: 15, dayOffset: 0, branch: '未' }, // Goat: 1pm-3pm
+  { name: '申时', zodiac: '猴', startHour: 15, endHour: 17, dayOffset: 0, branch: '申' }, // Monkey: 3pm-5pm
+  { name: '酉时', zodiac: '鸡', startHour: 17, endHour: 19, dayOffset: 0, branch: '酉' }, // Rooster: 5pm-7pm
+  { name: '戌时', zodiac: '狗', startHour: 19, endHour: 21, dayOffset: 0, branch: '戌' }, // Dog: 7pm-9pm
+  { name: '亥时', zodiac: '猪', startHour: 21, endHour: 23, dayOffset: 0, branch: '亥' }  // Pig: 9pm-11pm
 ];
 
 const TIME_DESCRIPTIONS = {
@@ -62,7 +92,10 @@ const TIME_DESCRIPTIONS = {
   '亥时': '人定，又名定昏'
 };
 
+// Base date for lunar calendar calculations (Jan 31, 1900)
 const BASE_DATE = new Date(1900, 0, 31);
+
+// Constant for date calculations (24 * 60 * 60 * 1000)
 const MILLISECONDS_PER_DAY = 86400000;
 
 // ===== UTILITY FUNCTIONS =====
@@ -79,16 +112,25 @@ const getLunarYearInfo = year => LUNAR_INFO[year - 1900];
 
 /**
  * Calculate total days in a lunar year
+ * 
+ * The calculation:
+ * 1. Start with base of 348 days (12 months × 29 days)
+ * 2. Add 1 day for each "big month" (30 days) by checking bits
+ * 3. Add days from leap month if present
+ * 
+ * @param {number} year - Lunar year (1900-2049)
+ * @returns {number} Total days in the lunar year (353-385)
  */
 const calculateLunarYearDays = year => {
   const yearInfo = getLunarYearInfo(year);
   let totalDays = 348; // Base: 12 months × 29 days
-  
-  // Add extra days for big months (30 days vs 29)
+
+  // Check each bit (0x8000 to 0x10) to determine 30-day months
+  // Bit set to 1 = 30 days (big month), 0 = 29 days (small month)
   for (let i = 0x8000; i > 0x8; i >>= 1) {
     totalDays += (yearInfo & i) ? 1 : 0;
   }
-  
+
   return totalDays + calculateLeapMonthDays(year);
 };
 
@@ -103,7 +145,7 @@ const getLeapMonth = year => getLunarYearInfo(year) & 0xf;
 const calculateLeapMonthDays = year => {
   const leapMonth = getLeapMonth(year);
   if (leapMonth === 0) return 0;
-  
+
   const yearInfo = getLunarYearInfo(year);
   return (yearInfo & 0x10000) ? 30 : 29;
 };
@@ -141,17 +183,23 @@ const formatLunarDay = day => {
 
 /**
  * Adjust date for Chinese time zodiac system
- * 子时 (23:00-01:00) belongs to the next day
+ * 
+ * In traditional Chinese timekeeping, 子时 (23:00-01:00) is considered
+ * the beginning of the next day. This function adjusts the date accordingly.
+ * 
+ * @param {Date} date - The date to adjust
+ * @returns {Date} Adjusted date (next day if hour is 23, same day otherwise)
  */
 const adjustForTimeZodiac = date => {
   const hour = date.getHours();
-  
+
+  // If it's 11pm (23:00), it's considered the next day in lunar calendar
   if (hour === 23) {
     const adjustedDate = new Date(date);
     adjustedDate.setDate(adjustedDate.getDate() + 1);
     return adjustedDate;
   }
-  
+
   return date;
 };
 
@@ -166,7 +214,7 @@ const getTimePeriod = date => {
   }
 
   const hour = date.getHours();
-  
+
   // Handle special case for 子时 (23:00-01:00 next day)
   if (hour >= 23 || hour < 1) {
     return {
@@ -181,7 +229,7 @@ const getTimePeriod = date => {
   // Find the appropriate time period using functional approach
   const timePeriod = TIME_PERIODS.find(period => {
     if (period.name === '子时') return false; // Already handled above
-    
+
     return hour >= period.startHour && hour < period.endHour;
   });
 
@@ -207,14 +255,24 @@ const getTimePeriod = date => {
 // ===== CORE CONVERSION FUNCTIONS =====
 
 /**
- * Convert solar date to lunar date information
+ * Convert solar (Gregorian) date to lunar date information
+ * 
+ * Algorithm:
+ * 1. Calculate days from base date (Jan 31, 1900)
+ * 2. Subtract year by year to find lunar year
+ * 3. Subtract month by month (handling leap months) to find lunar month
+ * 4. Remaining days = lunar day
+ * 
+ * @param {Date} solarDate - Gregorian date to convert
+ * @returns {Object} Lunar date info: { year, month, day, isLeap }
  */
 const calculateLunarFromSolar = solarDate => {
+  // Calculate total days from base date (1900/1/31)
   const dayOffset = Math.round((solarDate.valueOf() - BASE_DATE.valueOf()) / MILLISECONDS_PER_DAY);
   let remainingDays = dayOffset;
   let year = 1900;
-  
-  // Find the lunar year using functional approach
+
+  // Find the lunar year by subtracting year lengths
   while (year < 2050 && remainingDays > 0) {
     const yearDays = calculateLunarYearDays(year);
     if (remainingDays < yearDays) break;
@@ -227,17 +285,18 @@ const calculateLunarFromSolar = solarDate => {
     remainingDays += calculateLunarYearDays(year);
   }
 
-  // Find the lunar month and day
+  // Find the lunar month and day by subtracting month lengths
   const leapMonth = getLeapMonth(year);
   let month = 1;
   let isLeapMonth = false;
 
   while (month <= 12 && remainingDays > 0) {
     let monthDays;
-    
-    // Handle leap month
+
+    // Handle leap month: leap month comes after the regular month
+    // For example, if month 4 is leap, we have: month 4 -> leap month 4 -> month 5
     if (leapMonth > 0 && month === leapMonth + 1 && !isLeapMonth) {
-      month--;
+      month--; // Step back to process the leap month
       isLeapMonth = true;
       monthDays = calculateLeapMonthDays(year);
     } else {
@@ -245,9 +304,10 @@ const calculateLunarFromSolar = solarDate => {
     }
 
     if (remainingDays < monthDays) break;
-    
+
     remainingDays -= monthDays;
-    
+
+    // After processing leap month, continue with next month
     if (isLeapMonth) {
       isLeapMonth = false;
     }
@@ -278,12 +338,24 @@ const calculateLunarFromSolar = solarDate => {
 };
 
 /**
- * Convert lunar date to solar date information
+ * Convert lunar date to solar (Gregorian) date information
+ * 
+ * Algorithm (reverse of lunar to solar):
+ * 1. Add up all days from 1900 to target lunar year
+ * 2. Add days for complete months in target year
+ * 3. Add days in target month
+ * 4. Add to base date to get Gregorian date
+ * 
+ * @param {number} lunarYear - Lunar year
+ * @param {number} lunarMonth - Lunar month (1-12)
+ * @param {number} lunarDay - Lunar day (1-30)
+ * @param {boolean} isLeapMonth - Whether this is a leap month
+ * @returns {Object} Solar date info: { year, month, day }
  */
 const calculateSolarFromLunar = (lunarYear, lunarMonth, lunarDay, isLeapMonth = false) => {
   let totalDays = 0;
 
-  // Add days for complete years using functional approach
+  // Sum all days from 1900 to target year (exclusive)
   for (let year = 1900; year < lunarYear; year++) {
     totalDays += calculateLunarYearDays(year);
   }
@@ -305,7 +377,7 @@ const calculateSolarFromLunar = (lunarYear, lunarMonth, lunarDay, isLeapMonth = 
   totalDays += lunarDay - 1;
 
   const solarDate = new Date(BASE_DATE.valueOf() + totalDays * MILLISECONDS_PER_DAY);
-  
+
   return {
     year: solarDate.getFullYear(),
     month: solarDate.getMonth(),
@@ -314,16 +386,27 @@ const calculateSolarFromLunar = (lunarYear, lunarMonth, lunarDay, isLeapMonth = 
 };
 
 /**
- * Calculate stem-branch information for a date
+ * Calculate stem-branch (干支) information for a date
+ * 
+ * The stem-branch system is a 60-year/60-day cycle combining:
+ * - 10 Heavenly Stems (天干)
+ * - 12 Earthly Branches (地支)
+ * Used for years, months, days, and hours in traditional Chinese calendar
+ * 
+ * @param {number} year - Gregorian year
+ * @param {number} month - Gregorian month (0-11)
+ * @param {number} day - Gregorian day
+ * @returns {Object} Stem-branch for year, month, and day
  */
 const calculateStemBranch = (year, month, day) => {
-  // Year stem-branch (simplified)
+  // Year stem-branch: 1900 = 36th in 60-year cycle (庚子年)
   const yearStemBranch = getStemBranch(year - 1900 + 36);
-  
-  // Month stem-branch
+
+  // Month stem-branch: based on year and month
   const monthStemBranch = getStemBranch((year - 1900) * 12 + month + 12);
-  
-  // Day stem-branch
+
+  // Day stem-branch: 1900/1/1 = 10th in 60-day cycle (甲戌日)
+  // Days between 1970/1/1 and 1900/1/1 = 25567 days
   const dayOffset = Math.floor(Date.UTC(year, month, day) / MILLISECONDS_PER_DAY) + 25567 + 10;
   const dayStemBranch = getStemBranch(dayOffset + day - 1);
 
@@ -338,22 +421,33 @@ const calculateStemBranch = (year, month, day) => {
 
 /**
  * Convert Gregorian (solar) date to comprehensive lunar calendar information
+ * 
+ * Main API function that returns complete lunar calendar data including:
+ * - Solar date info (year, month, day, time)
+ * - Lunar date info (year, month, day, zodiac)
+ * - Stem-branch (干支) for year, month, day, hour
+ * - Time period (时辰) information
+ * - Festivals and solar terms (to be implemented)
+ * 
+ * @param {Date} solarDate - Gregorian date (with optional time)
+ * @returns {Object} Comprehensive lunar calendar information
+ * @throws {Error} If invalid date provided
  */
 const solarToLunar = solarDate => {
   if (!isValidDate(solarDate)) {
     throw new Error('Invalid date provided');
   }
 
-  // Adjust for time zodiac boundary
+  // Adjust date if time is 23:00 (belongs to next day in lunar calendar)
   const adjustedDate = adjustForTimeZodiac(solarDate);
   const normalizedDate = new Date(adjustedDate.getFullYear(), adjustedDate.getMonth(), adjustedDate.getDate());
-  
+
   // Calculate lunar information
   const lunarInfo = calculateLunarFromSolar(normalizedDate);
-  
+
   // Get time period if time is available
   const timePeriod = solarDate.getHours !== undefined ? getTimePeriod(solarDate) : null;
-  
+
   // Calculate stem-branch information
   const stemBranchInfo = calculateStemBranch(normalizedDate.getFullYear(), normalizedDate.getMonth(), normalizedDate.getDate());
 
@@ -392,6 +486,18 @@ const solarToLunar = solarDate => {
 
 /**
  * Convert lunar date to Gregorian (solar) calendar information
+ * 
+ * Reverse conversion from lunar to solar date.
+ * Important: If the lunar month is a leap month, set isLeapMonth to true
+ * 
+ * Example:
+ * - lunar2solar(new Date(2012, 3, 7), false) → 2012-04-27 (regular 4th month)
+ * - lunar2solar(new Date(2012, 3, 7), true)  → 2012-05-27 (leap 4th month)
+ * 
+ * @param {Date} lunarDate - Lunar date (year, month, day)
+ * @param {boolean} isLeapMonth - Whether this is a leap month
+ * @returns {Object} Comprehensive solar calendar information
+ * @throws {Error} If invalid date provided
  */
 const lunarToSolar = (lunarDate, isLeapMonth = false) => {
   if (!isValidDate(lunarDate)) {
@@ -401,11 +507,11 @@ const lunarToSolar = (lunarDate, isLeapMonth = false) => {
   const lunarYear = lunarDate.getFullYear();
   const lunarMonth = lunarDate.getMonth() + 1;
   const lunarDay = lunarDate.getDate();
-  
+
   // Calculate solar date
   const solarInfo = calculateSolarFromLunar(lunarYear, lunarMonth, lunarDay, isLeapMonth);
   const solarDate = new Date(solarInfo.year, solarInfo.month, solarInfo.day);
-  
+
   // Calculate stem-branch information
   const stemBranchInfo = calculateStemBranch(solarInfo.year, solarInfo.month, solarInfo.day);
 
@@ -478,7 +584,7 @@ const testDate2 = new Date(2012, 3, 7);
 const result2 = lunarToSolar(testDate2, false);
 
 console.log('\n=== Functional Lunar to Solar Conversion ===');
-console.log(`Lunar Date: ${testDate2.getFullYear()}-${testDate2.getMonth()+1}-${testDate2.getDate()}`);
+console.log(`Lunar Date: ${testDate2.getFullYear()}-${testDate2.getMonth() + 1}-${testDate2.getDate()}`);
 console.log(`Solar Date: ${result2.solar.year}-${result2.solar.month}-${result2.solar.day}`);
 console.log(`Week Day: ${result2.solar.weekDay}`);
 
