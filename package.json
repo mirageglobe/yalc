@@ -1,9 +1,44 @@
 {
-  "name": "lunar",
+  "name": "yalc",
+  "version": "2.0.0",
+  "description": "Yet Another Lunar Calendar - JavaScript library for converting between Gregorian and Chinese lunar calendar dates",
+  "main": "yalc.js",
   "scripts": {
-    "test": "ava"
+    "test": "ava",
+    "test:watch": "ava --watch",
+    "test:verbose": "ava --verbose",
+    "dev": "node run.js"
+  },
+  "keywords": [
+    "lunar",
+    "calendar",
+    "chinese",
+    "solar",
+    "gregorian",
+    "zodiac",
+    "conversion",
+    "date"
+  ],
+  "author": "Jimmy Lim <mirageglobe@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mirageglobe/yalc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mirageglobe/yalc/issues"
+  },
+  "homepage": "https://github.com/mirageglobe/yalc#readme",
+  "engines": {
+    "node": ">=14.0.0"
   },
   "devDependencies": {
-    "ava": "^5.1.0"
+    "ava": "^6.4.1"
+  },
+  "ava": {
+    "files": [
+      "test.js"
+    ],
+    "verbose": true
   }
 }
