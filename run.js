@@ -71,21 +71,33 @@ const testDate = new Date('2024-12-26');
 const result = solarToLunar(testDate);
 displaySolarToLunar(result);
 
-// Example 7: Test future date (2026) - BUG FOUND!
+// Example 7: Test future date (2026) - Verification check
 console.log('\n=== VERIFICATION TEST FOR 2026-01-01 ===');
 const testDate2026 = new Date('2026-01-01');
 const result2026 = solarToLunar(testDate2026);
 displaySolarToLunar(result2026);
 
 console.log('\n--- VERIFICATION RESULTS ---');
-console.log('❌ INCORRECT OUTPUT DETECTED');
-console.log(`   Actual:   Lunar ${result2026.lunar.year}-${result2026.lunar.month}-${result2026.lunar.day} (leap: ${result2026.lunar.isLeapMonth})`);
-console.log(`   Expected: Lunar 2025-11-13 (leap: false)`);
-console.log('\n   According to online lunar calendar sources:');
-console.log('   • Jan 1, 2026 = 13th day of 11th lunar month (Year of Snake)');
-console.log('   • Chinese New Year 2026: Feb 17, 2026');
-console.log('   • Snake year starts: Jan 29, 2025 - Feb 16, 2026');
-console.log('\n⚠️  There appears to be a bug in the conversion algorithm.');
+const expected = { year: 2025, month: 11, day: 13, isLeapMonth: false };
+const actual = result2026.lunar;
+
+const isCorrect =
+    actual.year === expected.year &&
+    actual.month === expected.month &&
+    actual.day === expected.day &&
+    actual.isLeapMonth === expected.isLeapMonth;
+
+if (isCorrect) {
+    console.log('✅ PASS: Conversion is accurate.');
+    console.log(`   Lunar: ${actual.year}-${actual.month}-${actual.day} (leap: ${actual.isLeapMonth})`);
+} else {
+    console.log('❌ FAIL: Incorrect output detected!');
+    console.log(`   Actual:   Lunar ${actual.year}-${actual.month}-${actual.day} (leap: ${actual.isLeapMonth})`);
+    console.log(`   Expected: Lunar ${expected.year}-${expected.month}-${expected.day} (leap: ${expected.isLeapMonth})`);
+    console.log('\n   According to online lunar calendar sources:');
+    console.log('   • Jan 1, 2026 = 13th day of 11th lunar month (Year of Snake)');
+    console.log('   • Chinese New Year 2026: Feb 17, 2026');
+}
 
 // Example 8: Batch test multiple dates
 // const testDates = [
