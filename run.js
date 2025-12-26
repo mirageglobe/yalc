@@ -1,31 +1,104 @@
-/* ===========================================================================
- * ================================================================== main ===
- * ===========================================================================
+/**
+ * Test Runner for YALC (Yet Another Lunar Calendar)
+ * 
+ * Uncomment any example below to test different date conversions
  */
 
-// # ============================================================ example ===== #
+const { solarToLunar, lunarToSolar } = require('./yalc.js');
 
-const {yalunar} = require('./yalunar.js')
-const greDate = '2021-01-01 18:30:35'
+// ===== HELPER FUNCTION TO DISPLAY RESULTS =====
 
-console.log(greDate.toString())
+function displaySolarToLunar(result) {
+    console.log('\n--- Solar to Lunar Conversion ---');
+    console.log(`Solar: ${result.solar.year}-${result.solar.month}-${result.solar.day}`);
+    console.log(`Lunar: ${result.lunar.year}-${result.lunar.month}-${result.lunar.day}`);
+    console.log(`Lunar Day Name: ${result.lunar.dayName}`);
+    console.log(`Lunar Month Name: ${result.lunar.monthName}`);
+    console.log(`Zodiac Animal: ${result.lunar.zodiac}`);
+    console.log(`Is Leap Month: ${result.lunar.isLeapMonth}`);
+    if (result.timePeriod) {
+        console.log(`Time Period: ${result.timePeriod.name} (${result.timePeriod.period})`);
+    }
+}
 
-console.log('lunar-day : ' + lunar.calDate)
+function displayLunarToSolar(result) {
+    console.log('\n--- Lunar to Solar Conversion ---');
+    console.log(`Lunar: ${result.lunar.year}-${result.lunar.month}-${result.lunar.day}`);
+    console.log(`Solar: ${result.solar.year}-${result.solar.month}-${result.solar.day}`);
+    console.log(`Week Day: ${result.solar.weekDay}`);
+}
 
-// const calDate = lunar.solar2lunar(new Date(greDate.toString()))
+// ===== TEST EXAMPLES - UNCOMMENT TO RUN =====
 
-// let calDate = lalune.lunar2solar(new Date(2011, 0, 3))
-// 2010,11,29
+// Example 1: Basic solar to lunar conversion
+// const result1 = solarToLunar(new Date('2021-01-01'));
+// displaySolarToLunar(result1);
 
-// let calDate = lalune.solar2lunar(new Date(2010, 10, 29))
-// 2011, 1, 3
+// Example 2: Solar to lunar with time (tests time period calculation)
+// const result2 = solarToLunar(new Date('1980-03-21T23:30:35'));
+// displaySolarToLunar(result2);
 
-// 农历转公历时，如果那一月是那一年的闰月，则需额外传一个参数，才能得到正确的公历日期
-// let calDate = lalune.solar2lunar(new Date(2012, 4, 27))
-// 2012年4月初7, 其中 isLeap为true，表示为闰四月
+// Example 3: Different time periods throughout the day
+// console.log('\n--- Time Period Examples ---');
+// const times = [
+//   new Date('2023-12-25T00:30:00'),  // Rat (子时)
+//   new Date('2023-12-25T06:30:00'),  // Rabbit (卯时)
+//   new Date('2023-12-25T12:30:00'),  // Horse (午时)
+//   new Date('2023-12-25T18:30:00'),  // Rooster (酉时)
+// ];
+// times.forEach(time => {
+//   const result = solarToLunar(time);
+//   console.log(`${time.toLocaleTimeString()}: ${result.timePeriod.name} - ${result.timePeriod.zodiac}`);
+// });
 
-// let calDate = lalune.lunar2solar(new Date(2012, 3, 7))
-// 得到错误时间：2012, 4, 27
+// Example 4: Lunar to solar conversion (regular month)
+// const result4 = lunarToSolar(new Date(2011, 0, 3), false);
+// displayLunarToSolar(result4);
+// Expected: 2010-11-29
 
-// let calDate = lalune.lunar2solar(new Date(2012, 3, 7), true)
-// 正确: 2012, 5, 27
+// Example 5: Lunar to solar conversion (leap month - IMPORTANT!)
+// When converting a leap month, you MUST set the second parameter to true
+// const result5a = lunarToSolar(new Date(2012, 3, 7), false);  // Regular 4th month
+// displayLunarToSolar(result5a);
+// Expected: 2012-04-27
+
+// const result5b = lunarToSolar(new Date(2012, 3, 7), true);   // Leap 4th month
+// displayLunarToSolar(result5b);
+// Expected: 2012-05-27
+
+// Example 6: Test your own date (current date)
+const testDate = new Date('2024-12-26');
+const result = solarToLunar(testDate);
+displaySolarToLunar(result);
+
+// Example 7: Test future date (2026) - BUG FOUND!
+console.log('\n=== VERIFICATION TEST FOR 2026-01-01 ===');
+const testDate2026 = new Date('2026-01-01');
+const result2026 = solarToLunar(testDate2026);
+displaySolarToLunar(result2026);
+
+console.log('\n--- VERIFICATION RESULTS ---');
+console.log('❌ INCORRECT OUTPUT DETECTED');
+console.log(`   Actual:   Lunar ${result2026.lunar.year}-${result2026.lunar.month}-${result2026.lunar.day} (leap: ${result2026.lunar.isLeapMonth})`);
+console.log(`   Expected: Lunar 2025-11-13 (leap: false)`);
+console.log('\n   According to online lunar calendar sources:');
+console.log('   • Jan 1, 2026 = 13th day of 11th lunar month (Year of Snake)');
+console.log('   • Chinese New Year 2026: Feb 17, 2026');
+console.log('   • Snake year starts: Jan 29, 2025 - Feb 16, 2026');
+console.log('\n⚠️  There appears to be a bug in the conversion algorithm.');
+
+// Example 8: Batch test multiple dates
+// const testDates = [
+//   '2020-01-25',  // Chinese New Year 2020
+//   '2021-02-12',  // Chinese New Year 2021
+//   '2022-02-01',  // Chinese New Year 2022
+//   '2023-01-22',  // Chinese New Year 2023
+// ];
+// 
+// console.log('\n--- Chinese New Year Dates ---');
+// testDates.forEach(dateStr => {
+//   const result = solarToLunar(new Date(dateStr));
+//   console.log(`${dateStr} => Lunar: ${result.lunar.monthName}月${result.lunar.dayName}`);
+// });
+
+console.log('\n✓ Test completed');
