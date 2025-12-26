@@ -75,12 +75,12 @@ test('Solar to Lunar: Basic 2024 date conversion', t => {
 
 // ===== LUNAR TO SOLAR CONVERSION TESTS =====
 
-test('Lunar to Solar: 2011-1-3 converts to solar 2010-11-29', t => {
-  const result = lunarToSolar(new Date(2011, 0, 3), false);
+test('Lunar to Solar: 2011-1-3 converts to solar 2011-02-05', t => {
+  const result = lunarToSolar(new Date(2011, 0, 3), false); // Lunar 2011-01-03
 
-  t.is(result.solar.year, 2010, 'Solar year should be 2010');
-  t.is(result.solar.month, 11, 'Solar month should be November (11)');
-  t.is(result.solar.day, 29, 'Solar day should be 29');
+  t.is(result.solar.year, 2011, 'Solar year should be 2011');
+  t.is(result.solar.month, 2, 'Solar month should be February (2)');
+  t.is(result.solar.day, 5, 'Solar day should be 5');
 });
 
 test('Lunar to Solar: Round-trip conversion maintains accuracy', t => {
@@ -121,7 +121,7 @@ test('Leap month: 2012 leap 4th month (different from regular 4th month)', t => 
 
 // ===== ZODIAC ANIMAL TESTS =====
 
-test('Zodiac animals: Verify 12-year cycle', t => {
+test('Zodiac animals: Verify 12-year cycle (using dates after LNY)', t => {
   const zodiacCycle = [
     { year: 2020, animal: '鼠' }, // Rat
     { year: 2021, animal: '牛' }, // Ox
@@ -131,7 +131,8 @@ test('Zodiac animals: Verify 12-year cycle', t => {
   ];
 
   zodiacCycle.forEach(({ year, animal }) => {
-    const result = solarToLunar(new Date(`${year}-02-01`));
+    // Using May 1st to ensure we are well past Lunar New Year
+    const result = solarToLunar(new Date(`${year}-05-01`));
     t.is(result.lunar.zodiac, animal, `Year ${year} should be ${animal}`);
   });
 });
@@ -220,6 +221,15 @@ test('Edge case: Date near end of lunar calendar range (2049)', t => {
   t.truthy(result.lunar.year, 'Should have lunar year');
   t.truthy(result.lunar.month, 'Should have lunar month');
   t.truthy(result.lunar.day, 'Should have lunar day');
+});
+
+test('Regression: Solar to Lunar 2026-01-01 should be Lunar 2025-11-13', t => {
+  const result = solarToLunar(new Date('2026-01-01'));
+
+  t.is(result.lunar.year, 2025, 'Lunar year should be 2025');
+  t.is(result.lunar.month, 11, 'Lunar month should be 11');
+  t.is(result.lunar.day, 13, 'Lunar day should be 13');
+  t.is(result.lunar.isLeapMonth, false, 'Should NOT be a leap month');
 });
 
 // ===== DATA STRUCTURE VALIDATION TESTS =====

@@ -287,46 +287,27 @@ const calculateLunarFromSolar = solarDate => {
 
   // Find the lunar month and day by subtracting month lengths
   const leapMonth = getLeapMonth(year);
-  let month = 1;
+  let month;
   let isLeapMonth = false;
 
-  while (month <= 12 && remainingDays > 0) {
-    let monthDays;
-
-    // Handle leap month: leap month comes after the regular month
-    // For example, if month 4 is leap, we have: month 4 -> leap month 4 -> month 5
-    if (leapMonth > 0 && month === leapMonth + 1 && !isLeapMonth) {
-      month--; // Step back to process the leap month
-      isLeapMonth = true;
-      monthDays = calculateLeapMonthDays(year);
-    } else {
-      monthDays = calculateMonthDays(year, month);
+  for (month = 1; month <= 12; month++) {
+    // Regular month days
+    const monthDays = calculateMonthDays(year, month);
+    if (remainingDays < monthDays) {
+      isLeapMonth = false;
+      break;
     }
-
-    if (remainingDays < monthDays) break;
-
     remainingDays -= monthDays;
 
-    // After processing leap month, continue with next month
-    if (isLeapMonth) {
-      isLeapMonth = false;
+    // Leap month days (if applicable)
+    if (month === leapMonth) {
+      const leapDays = calculateLeapMonthDays(year);
+      if (remainingDays < leapDays) {
+        isLeapMonth = true;
+        break;
+      }
+      remainingDays -= leapDays;
     }
-    month++;
-  }
-
-  // Handle edge case for leap month
-  if (remainingDays === 0 && leapMonth > 0 && month === leapMonth + 1) {
-    if (isLeapMonth) {
-      isLeapMonth = false;
-    } else {
-      isLeapMonth = true;
-      month--;
-    }
-  }
-
-  if (remainingDays < 0) {
-    month--;
-    remainingDays += calculateMonthDays(year, month);
   }
 
   return {
