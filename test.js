@@ -320,3 +320,50 @@ test('Invalid input: Should throw error for null', t => {
     solarToLunar(null);
   }, { message: 'Invalid date provided' });
 });
+
+test('BaZi: Verify Four Pillars (Year, Month, Day, Hour)', t => {
+  // Test case: 2020-01-25 12:30 (Chinese New Year)
+  // 2020 is Geng-Zi (庚子) year
+  // 2020-01-25 is Ding-Mao (丁卯) day
+  // 12:30 is Wu-Shi (午时) branch
+  // Hour Stem for Ding Day and Wu Hour is Bing (丙)
+  const date = new Date(2020, 0, 25, 12, 30);
+  const result = solarToLunar(date);
+
+  // Year pillar
+  t.is(result.baZi.year.stem, '庚', 'Year stem should be Geng (庚)');
+  t.is(result.baZi.year.branch, '子', 'Year branch should be Zi (子)');
+
+  // Day pillar
+  t.is(result.baZi.day.stem, '丁', 'Day stem should be Ding (丁)');
+  t.is(result.baZi.day.branch, '卯', 'Day branch should be Mao (卯)');
+
+  // Hour pillar (newly implemented)
+  t.is(result.baZi.hour.stem, '丙', 'Hour stem for Ding Day + Wu Hour should be Bing (丙)');
+  t.is(result.baZi.hour.branch, '午', 'Hour branch should be Wu (午)');
+});
+
+
+test('Flexible Input: solarToLunar with numerical arguments', t => {
+  // 2024-12-28 15:45:30
+  const result = solarToLunar(2024, 12, 28, 15, 45, 30);
+  
+  t.is(result.solar.year, 2024);
+  t.is(result.solar.month, 12);
+  t.is(result.solar.day, 28);
+  t.is(result.solar.time.hour, 15);
+  t.is(result.solar.time.minute, 45);
+  t.is(result.solar.time.second, 30);
+});
+
+test('Flexible Input: lunarToSolar with numerical arguments and time', t => {
+  // Lunar 2025-11-9 12:30:00
+  const result = lunarToSolar(2025, 11, 9, false, 12, 30, 0);
+  
+  t.is(result.lunar.year, 2025);
+  t.is(result.lunar.month, 11);
+  t.is(result.lunar.day, 9);
+  t.is(result.solar.time.hour, 12);
+  t.is(result.solar.time.minute, 30);
+  t.is(result.solar.time.second, 0);
+});

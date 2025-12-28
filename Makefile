@@ -26,6 +26,25 @@ test: ## Run all tests using AVA
 test-watch: ## Run tests in watch mode
 	npx ava --watch
 
+today: ## Show lunar and BaZi info for today's date
+	@node -e "const { solarToLunar } = require('./yalc.js'); \
+	const r = solarToLunar(new Date()); \
+	const p = n => String(n).padStart(2, '0'); \
+	const timeStr = r.solar.time ? ' ' + p(r.solar.time.hour) + ':' + p(r.solar.time.minute) + ':' + p(r.solar.time.second) : ''; \
+	console.log('\n📅 Solar Date:', r.solar.year + '-' + p(r.solar.month) + '-' + p(r.solar.day) + timeStr); \
+	console.log('🌙 Lunar Date:', r.lunar.year + '-' + r.lunar.month + '-' + r.lunar.day + ' (' + r.lunar.dayName + ')'); \
+	console.log('🐯 Zodiac:', r.lunar.zodiac); \
+	console.log('\n🏮 BaZi (Eight Characters):'); \
+	console.log('  Year:  ' + r.baZi.year.stem + r.baZi.year.branch); \
+	console.log('  Month: ' + r.baZi.month.stem + r.baZi.month.branch); \
+	console.log('  Day:   ' + r.baZi.day.stem + r.baZi.day.branch); \
+	console.log('  Hour:  ' + (r.baZi.hour ? r.baZi.hour.stem + r.baZi.hour.branch : 'Not provided')); \
+	console.log('\n✨ Festivals:'); \
+	console.log('  Solar: ' + (r.festivals.solar ? r.festivals.solar.name : 'None')); \
+	console.log('  Lunar: ' + (r.festivals.lunar ? r.festivals.lunar.name : 'None')); \
+	if (r.festivals.sanniangSha) console.log('  ⚠️  Warning: Sanniang Sha Day (三娘煞)'); \
+	console.log('');"
+
 clean: ## Remove node_modules and logs
 	rm -rf node_modules
 	rm -rf *.log
