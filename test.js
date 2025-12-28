@@ -54,14 +54,51 @@ test('Solar to Lunar: 2021 Chinese New Year (Feb 12, 2021 = 1st day of 1st month
   t.is(result.lunar.zodiac, '牛', 'Zodiac should be Ox (牛)');
 });
 
-test('Solar to Lunar: 1980-03-21 conversion', t => {
-  const result = solarToLunar(new Date('1980-03-21'));
+test('Solar to Lunar: Mid-Autumn Festival dates across years (no calendar drift)', t => {
+  // Mid-Autumn Festival (中秋节) is always on Lunar August 15
+  // These are verified solar dates spanning 1980-2099 to check for calendar drift
+  // Sources: Hong Kong Observatory, Taiwan Central Weather Bureau
+  const midAutumnDates = [
+    // 1980s
+    { solar: '1980-09-23', lunarYear: 1980 },
+    { solar: '1985-09-29', lunarYear: 1985 },
+    { solar: '1989-09-14', lunarYear: 1989 },
+    // 1990s
+    { solar: '1990-10-03', lunarYear: 1990 },
+    { solar: '1995-09-09', lunarYear: 1995 },
+    { solar: '1999-09-24', lunarYear: 1999 },
+    // 2000s
+    { solar: '2000-09-12', lunarYear: 2000 },
+    { solar: '2005-09-18', lunarYear: 2005 },
+    { solar: '2008-09-14', lunarYear: 2008 },
+    // 2010s
+    { solar: '2010-09-22', lunarYear: 2010 },
+    { solar: '2015-09-27', lunarYear: 2015 },
+    { solar: '2019-09-13', lunarYear: 2019 },
+    // 2020s
+    { solar: '2020-10-01', lunarYear: 2020 },
+    { solar: '2024-09-17', lunarYear: 2024 },
+    { solar: '2025-10-06', lunarYear: 2025 },
+    // 2030s-2040s (testing mid-range)
+    { solar: '2030-09-12', lunarYear: 2030 },
+    { solar: '2040-09-20', lunarYear: 2040 },
+    { solar: '2049-09-11', lunarYear: 2049 },
+    // 2050s-2090s (testing extended LUNAR_INFO data)
+    { solar: '2050-09-30', lunarYear: 2050 },
+    { solar: '2060-09-09', lunarYear: 2060 },
+    { solar: '2070-09-19', lunarYear: 2070 },
+    { solar: '2080-09-28', lunarYear: 2080 },
+    { solar: '2090-09-08', lunarYear: 2090 },
+    { solar: '2099-09-29', lunarYear: 2099 }
+  ];
 
-  t.is(result.solar.year, 1980, 'Solar year should be 1980');
-  t.is(result.solar.month, 3, 'Solar month should be March (3)');
-  t.is(result.solar.day, 21, 'Solar day should be 21');
-  t.is(result.lunar.year, 1980, 'Lunar year should be 1980');
-  t.is(result.lunar.zodiac, '猴', 'Zodiac should be Monkey (猴)');
+  midAutumnDates.forEach(({ solar, lunarYear }) => {
+    const result = solarToLunar(new Date(solar));
+    t.is(result.lunar.year, lunarYear, `${solar}: Lunar year should be ${lunarYear}`);
+    t.is(result.lunar.month, 8, `${solar}: Lunar month should be August (8)`);
+    t.is(result.lunar.day, 15, `${solar}: Lunar day should be 15`);
+    t.is(result.lunar.isLeapMonth, false, `${solar}: Should NOT be a leap month`);
+  });
 });
 
 test('Solar to Lunar: Basic 2024 date conversion', t => {
