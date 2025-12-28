@@ -1,7 +1,6 @@
 # YALC - Yet Another Lunar Calendar
 
 [![CI](https://github.com/mirageglobe/yalc/actions/workflows/ci.yml/badge.svg)](https://github.com/mirageglobe/yalc/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/mirageglobe/yalc/actions/workflows/codeql.yml/badge.svg)](https://github.com/mirageglobe/yalc/actions/workflows/codeql.yml)
 
 A JavaScript library for converting between Gregorian (solar) and Chinese lunar calendar dates.
 
@@ -133,8 +132,7 @@ yalc/
 │   ├── PULL_REQUEST_TEMPLATE.md # PR checklist
 │   ├── ISSUE_TEMPLATE/          # Bug/feature templates
 │   └── workflows/
-│       ├── ci.yml               # Tests + Lint + Coverage
-│       └── codeql.yml           # Security scanning
+│       └── ci.yml               # Tests + Lint + Coverage
 ├── yalc.js                      # Main library (functional edition)
 ├── test.js                      # AVA test suite (22 tests)
 ├── run.js                       # Test runner with examples
