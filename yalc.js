@@ -143,7 +143,7 @@ const TIME_DESCRIPTIONS = {
   '子时': '夜半，又名子夜、中夜',
   '丑时': '鸡鸣，又名荒鸡',
   '寅时': '平旦，又称黎明、早晨、日旦',
-  '卯时': '日出，又名日始、破晓、旭日',
+  '卯时': '卯时，又名日始、破晓、旭日',
   '辰时': '食时，又名早食',
   '巳时': '隅中，又名日禺',
   '午时': '日中，又名日正、中午',
@@ -153,6 +153,129 @@ const TIME_DESCRIPTIONS = {
   '戌时': '黄昏，又名日夕、日暮、日晚',
   '亥时': '人定，又名定昏'
 };
+
+// ===== FESTIVAL DATA =====
+
+/**
+ * Solar (Gregorian) Festivals
+ * Format: 'MMDD*Name' where * indicates a public holiday
+ */
+const SOLAR_FESTIVALS = {
+  '0101': { name: '元旦', isHoliday: true, english: "New Year's Day" },
+  '0214': { name: '情人节', isHoliday: false, english: "Valentine's Day" },
+  '0308': { name: '妇女节', isHoliday: false, english: "Women's Day" },
+  '0312': { name: '植树节', isHoliday: false, english: 'Arbor Day' },
+  '0401': { name: '愚人节', isHoliday: false, english: "April Fool's Day" },
+  '0422': { name: '地球日', isHoliday: false, english: 'Earth Day' },
+  '0501': { name: '劳动节', isHoliday: true, english: 'Labor Day' },
+  '0504': { name: '青年节', isHoliday: false, english: 'Youth Day' },
+  '0601': { name: '儿童节', isHoliday: false, english: "Children's Day" },
+  '0910': { name: '教师节', isHoliday: false, english: "Teachers' Day" },
+  '1001': { name: '国庆节', isHoliday: true, english: 'National Day' },
+  '1224': { name: '平安夜', isHoliday: false, english: 'Christmas Eve' },
+  '1225': { name: '圣诞节', isHoliday: false, english: 'Christmas Day' }
+};
+
+/**
+ * Lunar (Chinese) Festivals
+ * Format: 'MMDD' where MM is lunar month, DD is lunar day
+ * Special: '0100' means last day of 12th month (New Year's Eve)
+ * 
+ * Includes major festivals and traditional religious/cultural dates:
+ * - Buddhist dates (释迦牟尼, 观世音菩萨, 地藏王)
+ * - Taoist dates (元始天尊, 太上老君, 玉皇大帝, 关公, 妈祖)
+ * - Folk traditions (三娘煞, 头牙/尾牙)
+ * 
+ * Dates verified against: nationsonline.org, kenyon.edu, wikipedia.org
+ */
+const LUNAR_FESTIVALS = {
+  // First month (正月)
+  '0101': { name: '春节', isHoliday: true, english: 'Spring Festival', extra: '元始天尊圣旦 四始吉日' },
+  '0104': { name: '迎神日', isHoliday: false, english: 'Welcoming Gods Day' },
+  '0105': { name: '接财神', isHoliday: false, english: 'Welcoming God of Wealth' },
+  '0109': { name: '玉皇大帝诞', isHoliday: false, english: 'Jade Emperor Birthday' },
+  '0115': { name: '元宵节', isHoliday: false, english: 'Lantern Festival', extra: '上元节' },
+  // Second month
+  '0202': { name: '龙抬头', isHoliday: false, english: 'Dragon Raises Head', extra: '福德正神圣旦' },
+  '0203': { name: '文昌圣旦', isHoliday: false, english: 'Wenchang Birthday' },
+  '0215': { name: '释迦牟尼涅槃', isHoliday: false, english: 'Buddha Nirvana Day', extra: '太上老君圣旦' },
+  '0216': { name: '头牙', isHoliday: false, english: 'First Ya Festival', extra: '祭拜地主日' },
+  '0219': { name: '观世音菩萨圣旦', isHoliday: false, english: 'Guanyin Birthday' },
+  // Third month
+  '0303': { name: '上巳节', isHoliday: false, english: 'Shangsi Festival', extra: '玄天上帝诞' },
+  '0323': { name: '妈祖圣旦', isHoliday: false, english: 'Mazu Birthday' },
+  // Fourth month
+  '0401': { name: '四始吉日', isHoliday: false, english: 'Auspicious Day' },
+  '0408': { name: '释迦牟尼佛诞', isHoliday: false, english: 'Buddha Birthday', extra: '浴佛节' },
+  // Fifth month
+  '0505': { name: '端午节', isHoliday: true, english: 'Dragon Boat Festival' },
+  '0513': { name: '关公磨刀日', isHoliday: false, english: 'Guan Yu Sword Day' },
+  // Sixth month
+  '0619': { name: '观世音菩萨成道日', isHoliday: false, english: 'Guanyin Enlightenment' },
+  '0624': { name: '关公圣旦', isHoliday: false, english: 'Guan Yu Birthday' },
+  // Seventh month
+  '0701': { name: '四始吉日', isHoliday: false, english: 'Auspicious Day' },
+  '0707': { name: '七夕', isHoliday: false, english: 'Qixi Festival', extra: 'Chinese Valentine\'s Day' },
+  '0715': { name: '中元节', isHoliday: false, english: 'Ghost Festival', extra: '盂兰盆节' },
+  '0719': { name: '值年太岁圣旦', isHoliday: false, english: 'Tai Sui Birthday' },
+  '0730': { name: '地藏王菩萨诞', isHoliday: false, english: 'Dizang Bodhisattva Birthday' },
+  // Eighth month
+  '0815': { name: '中秋节', isHoliday: true, english: 'Mid-Autumn Festival' },
+  // Ninth month
+  '0909': { name: '重阳节', isHoliday: false, english: 'Double Ninth Festival' },
+  '0919': { name: '观世音菩萨出家日', isHoliday: false, english: 'Guanyin Renunciation Day' },
+  // Tenth month
+  '1001': { name: '寒衣节', isHoliday: false, english: 'Cold Clothes Festival', extra: '祭祖节' },
+  '1015': { name: '下元节', isHoliday: false, english: 'Lower Yuan Festival', extra: '水官大帝诞' },
+  // Eleventh month
+  '1119': { name: '观世音菩萨诞', isHoliday: false, english: 'Guanyin Day', extra: '南海观音入海日' },
+  // Twelfth month (腊月)
+  '1208': { name: '腊八节', isHoliday: false, english: 'Laba Festival' },
+  '1216': { name: '尾牙', isHoliday: false, english: 'Last Ya Festival', extra: '谢地主日' },
+  '1223': { name: '小年', isHoliday: false, english: 'Little New Year' },
+  '1224': { name: '送神日', isHoliday: false, english: 'Sending Gods Day' },
+  '1225': { name: '天官巡人间', isHoliday: false, english: 'Heaven Official Inspection' },
+  // Special: Last day of year (varies 29 or 30)
+  '0100': { name: '除夕', isHoliday: true, english: "New Year's Eve" }
+};
+
+/**
+ * 三娘煞日 (Sanniang Sha Days) - Inauspicious days for weddings
+ * Days: 3, 7, 13, 18, 22, 27 of each lunar month
+ */
+const SANNIANG_SHA_DAYS = [3, 7, 13, 18, 22, 27];
+
+/**
+ * 24 Solar Terms (二十四节气)
+ * Traditional Chinese calendar divisions based on sun's position
+ * Two per month, roughly 15 days apart
+ */
+const SOLAR_TERMS = [
+  { name: '小寒', english: 'Minor Cold', month: 1 },
+  { name: '大寒', english: 'Major Cold', month: 1 },
+  { name: '立春', english: 'Start of Spring', month: 2 },
+  { name: '雨水', english: 'Rain Water', month: 2 },
+  { name: '惊蛰', english: 'Awakening of Insects', month: 3 },
+  { name: '春分', english: 'Spring Equinox', month: 3 },
+  { name: '清明', english: 'Clear and Bright', month: 4 },
+  { name: '谷雨', english: 'Grain Rain', month: 4 },
+  { name: '立夏', english: 'Start of Summer', month: 5 },
+  { name: '小满', english: 'Grain Buds', month: 5 },
+  { name: '芒种', english: 'Grain in Ear', month: 6 },
+  { name: '夏至', english: 'Summer Solstice', month: 6 },
+  { name: '小暑', english: 'Minor Heat', month: 7 },
+  { name: '大暑', english: 'Major Heat', month: 7 },
+  { name: '立秋', english: 'Start of Autumn', month: 8 },
+  { name: '处暑', english: 'End of Heat', month: 8 },
+  { name: '白露', english: 'White Dew', month: 9 },
+  { name: '秋分', english: 'Autumn Equinox', month: 9 },
+  { name: '寒露', english: 'Cold Dew', month: 10 },
+  { name: '霜降', english: 'Frost Descent', month: 10 },
+  { name: '立冬', english: 'Start of Winter', month: 11 },
+  { name: '小雪', english: 'Minor Snow', month: 11 },
+  { name: '大雪', english: 'Major Snow', month: 12 },
+  { name: '冬至', english: 'Winter Solstice', month: 12 }
+];
 
 // Base date for lunar calendar calculations (Jan 31, 1900)
 const BASE_DATE = new Date(1900, 0, 31);
@@ -460,6 +583,48 @@ const calculateStemBranch = (year, month, day) => {
   };
 };
 
+// ===== FESTIVAL LOOKUP FUNCTIONS =====
+
+/**
+ * Get solar (Gregorian) festival for a given date
+ * @param {number} month - Month (1-12)
+ * @param {number} day - Day (1-31)
+ * @returns {Object|null} Festival info or null
+ */
+const getSolarFestival = (month, day) => {
+  const key = String(month).padStart(2, '0') + String(day).padStart(2, '0');
+  return SOLAR_FESTIVALS[key] || null;
+};
+
+/**
+ * Get lunar festival for a given lunar date
+ * @param {number} month - Lunar month (1-12)
+ * @param {number} day - Lunar day (1-30)
+ * @param {number} year - Lunar year (for New Year's Eve calculation)
+ * @returns {Object|null} Festival info or null
+ */
+const getLunarFestival = (month, day, year) => {
+  const key = String(month).padStart(2, '0') + String(day).padStart(2, '0');
+
+  // Check for New Year's Eve (last day of 12th month)
+  if (month === 12) {
+    const lastDay = calculateMonthDays(year, 12);
+    if (day === lastDay) {
+      return LUNAR_FESTIVALS['0100']; // 除夕
+    }
+  }
+
+  return LUNAR_FESTIVALS[key] || null;
+};
+
+/**
+ * Check if a lunar day is a 三娘煞日 (Sanniang Sha Day)
+ * These are inauspicious days for weddings: 3, 7, 13, 18, 22, 27
+ * @param {number} day - Lunar day
+ * @returns {boolean} True if it's a Sanniang Sha day
+ */
+const isSanniangShaDay = day => SANNIANG_SHA_DAYS.includes(day);
+
 // ===== MAIN API FUNCTIONS =====
 
 /**
@@ -470,7 +635,7 @@ const calculateStemBranch = (year, month, day) => {
  * - Lunar date info (year, month, day, zodiac)
  * - Stem-branch (干支) for year, month, day, hour
  * - Time period (时辰) information
- * - Festivals and solar terms (to be implemented)
+ * - Festivals (solar and lunar)
  * 
  * @param {Date} solarDate - Gregorian date (with optional time)
  * @returns {Object} Comprehensive lunar calendar information
@@ -493,6 +658,11 @@ const solarToLunar = solarDate => {
 
   // Calculate stem-branch information
   const stemBranchInfo = calculateStemBranch(normalizedDate.getFullYear(), normalizedDate.getMonth(), normalizedDate.getDate());
+
+  // Get festival information
+  const solarFestival = getSolarFestival(normalizedDate.getMonth() + 1, normalizedDate.getDate());
+  const lunarFestival = getLunarFestival(lunarInfo.month, lunarInfo.day, lunarInfo.year);
+  const sanniangSha = isSanniangShaDay(lunarInfo.day);
 
   return {
     solar: {
@@ -522,7 +692,11 @@ const solarToLunar = solarDate => {
       time: timePeriod ? timePeriod.branch : null
     },
     timePeriod,
-    festivals: { solar: '', lunar: '' },
+    festivals: {
+      solar: solarFestival,
+      lunar: lunarFestival,
+      sanniangSha
+    },
     solarTerms: ''
   };
 };
@@ -558,6 +732,11 @@ const lunarToSolar = (lunarDate, isLeapMonth = false) => {
   // Calculate stem-branch information
   const stemBranchInfo = calculateStemBranch(solarInfo.year, solarInfo.month, solarInfo.day);
 
+  // Get festival information
+  const solarFestival = getSolarFestival(solarInfo.month + 1, solarInfo.day);
+  const lunarFestival = getLunarFestival(lunarMonth, lunarDay, lunarYear);
+  const sanniangSha = isSanniangShaDay(lunarDay);
+
   return {
     solar: {
       year: solarInfo.year,
@@ -582,7 +761,11 @@ const lunarToSolar = (lunarDate, isLeapMonth = false) => {
       time: null
     },
     timePeriod: null,
-    festivals: { solar: '', lunar: '' },
+    festivals: {
+      solar: solarFestival,
+      lunar: lunarFestival,
+      sanniangSha
+    },
     solarTerms: ''
   };
 };
