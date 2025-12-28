@@ -1,5 +1,8 @@
 # YALC - Yet Another Lunar Calendar
 
+[![CI](https://github.com/mirageglobe/yalc/actions/workflows/ci.yml/badge.svg)](https://github.com/mirageglobe/yalc/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/mirageglobe/yalc/actions/workflows/codeql.yml/badge.svg)](https://github.com/mirageglobe/yalc/actions/workflows/codeql.yml)
+
 A JavaScript library for converting between Gregorian (solar) and Chinese lunar calendar dates.
 
 **Maintainer:** Jimmy Lim <mirageglobe@gmail.com>
@@ -125,11 +128,35 @@ This project uses **functional programming** principles:
 
 ```
 yalc/
-├── yalc.js                  # Main library (functional edition)
-├── test.js                  # AVA test suite (22 tests)
-├── run.js                   # Test runner with examples
-├── yalunar-legacy.js        # Original implementation
-└── yalunar-legacy-refactor.js  # Refactored legacy code
+├── .github/
+│   ├── dependabot.yml           # Automated dependency updates
+│   ├── PULL_REQUEST_TEMPLATE.md # PR checklist
+│   ├── ISSUE_TEMPLATE/          # Bug/feature templates
+│   └── workflows/
+│       ├── ci.yml               # Tests + Lint + Coverage
+│       └── codeql.yml           # Security scanning
+├── yalc.js                      # Main library (functional edition)
+├── test.js                      # AVA test suite (22 tests)
+├── run.js                       # Test runner with examples
+├── .eslintrc.json               # ESLint configuration
+└── package.json                 # Dependencies
+```
+
+---
+
+## Contributing
+
+Contributions are welcome! The project uses automated CI checks:
+
+- **Tests**: Run on Node.js 18, 20, 22
+- **ESLint**: Code style checking
+- **CodeQL**: Security vulnerability scanning
+- **Dependabot**: Automated dependency updates
+
+Before submitting a PR:
+```bash
+npm test              # Run tests
+npx eslint yalc.js    # Check code style
 ```
 
 ---
@@ -171,4 +198,4 @@ Example: 0x095b0 for year 1980 (庚申年 - Year of the Monkey)
 
 ## License
 
-MIT License - See LICENSE file for details
+Apache License 2.0 - See [LICENSE](LICENSE) file for details
