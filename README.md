@@ -15,6 +15,7 @@ A JavaScript library for converting between Gregorian (solar) and Chinese lunar 
 - ✅ **Chinese zodiac animals** (12-year cycle)
 - ✅ **Time periods** (时辰) - Traditional 12 two-hour periods
 - ✅ **Stem-Branch system** (干支) - Year, month, day pillars
+- ✅ **BaZi (Eight Characters)** - Heavenly Stems and Earthly Branches for all 4 pillars
 - ✅ **Lunar day formatting** - Chinese character representation
 - ✅ **Festival detection** - Solar, lunar, and religious festivals
 - ✅ **Date range:** 1900-2100
@@ -34,19 +35,36 @@ npm install
 ```javascript
 const { solarToLunar, lunarToSolar } = require('./yalc.js');
 
-// Convert solar date to lunar
-const result = solarToLunar(new Date('2024-12-26'));
-console.log(result.lunar);
-// Output: { year: 2024, month: 11, day: 26, zodiac: '龙', ... }
+// 1. Solar to Lunar (Flexible Inputs)
+// Format A: Date Object
+const result1 = solarToLunar(new Date());
 
-// Check for festivals
-console.log(result.festivals);
-// Output: { solar: null, lunar: {...}, sanniangSha: false }
+// Format B: Numerical arguments (Year, Month, Day, Hour, Min, Sec)
+const result2 = solarToLunar(2024, 12, 28, 15, 30, 0);
 
-// Convert lunar date to solar (with leap month flag)
-const solar = lunarToSolar(new Date(2012, 3, 7), false);
-console.log(solar.solar);
-// Output: { year: 2012, month: 4, day: 27, ... }
+console.log(result2.lunar);
+// Output: { year: 2024, month: 11, day: 28, dayName: '廿八', ... }
+
+// 2. BaZi (Eight Characters) with Hour Pillar
+console.log(result2.baZi);
+/* Output:
+{
+  year: { stem: '甲', branch: '辰' },
+  month: { stem: '丙', branch: '子' },
+  day: { stem: '辛', branch: '未' },
+  hour: { stem: '丙', branch: '申' }
+}
+*/
+
+// 3. Lunar to Solar (Backward Compatible & Numerical)
+// Format A: Date Object + isLeap
+const solar1 = lunarToSolar(new Date(2012, 3, 7), false);
+
+// Format B: Numerical (Year, Month, Day, isLeap, Hour, Min, Sec)
+const solar2 = lunarToSolar(2012, 4, 7, false, 12, 0, 0);
+
+console.log(solar2.solar);
+// Output: { year: 2012, month: 4, day: 27, time: { hour: 12, ... }, ... }
 ```
 
 ---
@@ -80,7 +98,7 @@ The library returns festival information in the `festivals` object:
 ## Testing
 
 ```bash
-# Run tests (22 tests including Mid-Autumn Festival drift tests)
+# Run tests (25 tests including Mid-Autumn Festival and BaZi accuracy)
 npm test
 
 # Run tests in watch mode
@@ -95,11 +113,13 @@ npx ava --verbose
 ## Development
 
 ```bash
-# Run the main script
-node yalc.js
-
-# Run test examples
+# Run the example test runner (shows Today overview)
 node run.js
+
+# Use Makefile for quick checks
+make today            # Show lunar/BaZi for right now
+make run              # Same as node run.js
+make test             # Run all tests
 ```
 
 ---
@@ -134,8 +154,9 @@ yalc/
 │   └── workflows/
 │       └── ci.yml               # Tests + Lint + Coverage
 ├── yalc.js                      # Main library (functional edition)
-├── test.js                      # AVA test suite (22 tests)
-├── run.js                       # Test runner with examples
+├── test.js                      # AVA test suite (25 tests)
+├── run.js                       # Test runner (3-day view + examples)
+├── Makefile                     # Build/dev shortcuts (make today, make run)
 ├── .eslintrc.json               # ESLint configuration
 └── package.json                 # Dependencies
 ```

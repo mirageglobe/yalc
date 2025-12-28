@@ -354,6 +354,14 @@ const isLeapYear = year => year % 4 === 0 && (year % 100 !== 0 || year % 400 ===
 const getStemBranch = num => HEAVENLY_STEMS[num % 10] + EARTHLY_BRANCHES[num % 12];
 
 /**
+ * Get the Heavenly Stem for an hour based on the Day Stem and Hour Branch
+ * Formula: HourStemIndex = (DayStemIndex % 5 * 2 + HourBranchIndex) % 10
+ */
+const getHourStem = (dayStemIdx, hourBranchIdx) => {
+  return HEAVENLY_STEMS[(dayStemIdx % 5 * 2 + hourBranchIdx) % 10];
+};
+
+/**
  * Format lunar day into Chinese characters
  */
 const formatLunarDay = day => {
@@ -516,9 +524,12 @@ const calculateLunarFromSolar = solarDate => {
  * @param {number} lunarMonth - Lunar month (1-12)
  * @param {number} lunarDay - Lunar day (1-30)
  * @param {boolean} isLeapMonth - Whether this is a leap month
- * @returns {Object} Solar date info: { year, month, day }
+ * @param {number} hour - Hour (0-23)
+ * @param {number} minute - Minute (0-59)
+ * @param {number} second - Second (0-59)
+ * @returns {Object} Solar date info: { year, month, day, hour, minute, second }
  */
-const calculateSolarFromLunar = (lunarYear, lunarMonth, lunarDay, isLeapMonth = false) => {
+const calculateSolarFromLunar = (lunarYear, lunarMonth, lunarDay, isLeapMonth = false, hour = 0, minute = 0, second = 0) => {
   let totalDays = 0;
 
   // Sum all days from 1900 to target year (exclusive)
@@ -547,7 +558,10 @@ const calculateSolarFromLunar = (lunarYear, lunarMonth, lunarDay, isLeapMonth = 
   return {
     year: solarDate.getFullYear(),
     month: solarDate.getMonth(),
-    day: solarDate.getDate()
+    day: solarDate.getDate(),
+    hour,
+    minute,
+    second
   };
 };
 
@@ -566,20 +580,36 @@ const calculateSolarFromLunar = (lunarYear, lunarMonth, lunarDay, isLeapMonth = 
  */
 const calculateStemBranch = (year, month, day) => {
   // Year stem-branch: 1900 = 36th in 60-year cycle (庚子年)
-  const yearStemBranch = getStemBranch(year - 1900 + 36);
+  const yearIdx = (year - 1900 + 36) % 60;
 
   // Month stem-branch: based on year and month
-  const monthStemBranch = getStemBranch((year - 1900) * 12 + month + 12);
+  // Note: Standard BaZi uses solar terms for month boundaries, 
+  // but for broad utility we use the lunar month pillar logic here.
+  const monthIdx = ((year - 1900) * 12 + month + 12) % 60;
 
-  // Day stem-branch: 1900/1/1 = 10th in 60-day cycle (甲戌日)
-  // Days between 1970/1/1 and 1900/1/1 = 25567 days
+  // Day stem-branch
   const dayOffset = Math.floor(Date.UTC(year, month, day) / MILLISECONDS_PER_DAY) + 25567 + 10;
-  const dayStemBranch = getStemBranch(dayOffset + day - 1);
+  const dayIdx = dayOffset % 60;
 
   return {
-    year: yearStemBranch,
-    month: monthStemBranch,
-    day: dayStemBranch
+    year: {
+      stem: HEAVENLY_STEMS[yearIdx % 10],
+      branch: EARTHLY_BRANCHES[yearIdx % 12],
+      name: getStemBranch(yearIdx),
+      index: yearIdx
+    },
+    month: {
+      stem: HEAVENLY_STEMS[monthIdx % 10],
+      branch: EARTHLY_BRANCHES[monthIdx % 12],
+      name: getStemBranch(monthIdx),
+      index: monthIdx
+    },
+    day: {
+      stem: HEAVENLY_STEMS[dayIdx % 10],
+      branch: EARTHLY_BRANCHES[dayIdx % 12],
+      name: getStemBranch(dayIdx),
+      index: dayIdx
+    }
   };
 };
 
@@ -637,24 +667,42 @@ const isSanniangShaDay = day => SANNIANG_SHA_DAYS.includes(day);
  * - Time period (时辰) information
  * - Festivals (solar and lunar)
  * 
- * @param {Date} solarDate - Gregorian date (with optional time)
+ * Supports two input formats:
+ * 1. solarToLunar(dateObject)
+ * 2. solarToLunar(year, month, day, hour, minute, second)
+ * 
+ * @param {Date|number} solarDate - Gregorian date object OR year
+ * @param {number} [month] - Gregorian month (1-12)
+ * @param {number} [day] - Gregorian day (1-31)
+ * @param {number} [hour=0] - Hour (0-23)
+ * @param {number} [minute=0] - Minute (0-59)
+ * @param {number} [second=0] - Second (0-59)
  * @returns {Object} Comprehensive lunar calendar information
  * @throws {Error} If invalid date provided
  */
-const solarToLunar = solarDate => {
-  if (!isValidDate(solarDate)) {
+const solarToLunar = (solarDate, month, day, hour = 0, minute = 0, second = 0) => {
+  let date;
+  if (solarDate instanceof Date) {
+    date = solarDate;
+  } else if (typeof solarDate === 'number' && month !== undefined && day !== undefined) {
+    date = new Date(solarDate, month - 1, day, hour, minute, second);
+  } else {
+    throw new Error('Invalid date provided');
+  }
+
+  if (!isValidDate(date)) {
     throw new Error('Invalid date provided');
   }
 
   // Adjust date if time is 23:00 (belongs to next day in lunar calendar)
-  const adjustedDate = adjustForTimeZodiac(solarDate);
+  const adjustedDate = adjustForTimeZodiac(date);
   const normalizedDate = new Date(adjustedDate.getFullYear(), adjustedDate.getMonth(), adjustedDate.getDate());
 
   // Calculate lunar information
   const lunarInfo = calculateLunarFromSolar(normalizedDate);
 
   // Get time period if time is available
-  const timePeriod = solarDate.getHours !== undefined ? getTimePeriod(solarDate) : null;
+  const timePeriod = getTimePeriod(date);
 
   // Calculate stem-branch information
   const stemBranchInfo = calculateStemBranch(normalizedDate.getFullYear(), normalizedDate.getMonth(), normalizedDate.getDate());
@@ -670,11 +718,11 @@ const solarToLunar = solarDate => {
       month: normalizedDate.getMonth() + 1,
       day: normalizedDate.getDate(),
       weekDay: DAY_NAMES[normalizedDate.getDay()],
-      time: solarDate.getHours !== undefined ? {
-        hour: solarDate.getHours(),
-        minute: solarDate.getMinutes(),
-        second: solarDate.getSeconds()
-      } : null
+      time: {
+        hour: date.getHours(),
+        minute: date.getMinutes(),
+        second: date.getSeconds()
+      }
     },
     lunar: {
       year: lunarInfo.year,
@@ -686,10 +734,19 @@ const solarToLunar = solarDate => {
       zodiac: ZODIAC_ANIMALS[(lunarInfo.year - 1900) % 12]
     },
     stemBranch: {
-      year: stemBranchInfo.year,
-      month: stemBranchInfo.month,
-      day: stemBranchInfo.day,
+      year: stemBranchInfo.year.name,
+      month: stemBranchInfo.month.name,
+      day: stemBranchInfo.day.name,
       time: timePeriod ? timePeriod.branch : null
+    },
+    baZi: {
+      year: { stem: stemBranchInfo.year.stem, branch: stemBranchInfo.year.branch },
+      month: { stem: stemBranchInfo.month.stem, branch: stemBranchInfo.month.branch },
+      day: { stem: stemBranchInfo.day.stem, branch: stemBranchInfo.day.branch },
+      hour: timePeriod ? {
+        stem: getHourStem(stemBranchInfo.day.index % 10, EARTHLY_BRANCHES.indexOf(timePeriod.branch)),
+        branch: timePeriod.branch
+      } : null
     },
     timePeriod,
     festivals: {
@@ -702,31 +759,48 @@ const solarToLunar = solarDate => {
 };
 
 /**
- * Convert lunar date to Gregorian (solar) calendar information
+ * Convert lunar date to comprehensive solar calendar information
  * 
- * Reverse conversion from lunar to solar date.
- * Important: If the lunar month is a leap month, set isLeapMonth to true
+ * Main API function (reverse of solarToLunar) that returns complete data.
  * 
- * Example:
- * - lunar2solar(new Date(2012, 3, 7), false) → 2012-04-27 (regular 4th month)
- * - lunar2solar(new Date(2012, 3, 7), true)  → 2012-05-27 (leap 4th month)
+ * Supports two input formats:
+ * 1. lunarToSolar(dateObject, [isLeapMonth=false], [hour=0], [min=0], [sec=0])
+ * 2. lunarToSolar(year, month, day, [isLeapMonth=false], [hour=0], [min=0], [sec=0])
  * 
- * @param {Date} lunarDate - Lunar date (year, month, day)
- * @param {boolean} isLeapMonth - Whether this is a leap month
- * @returns {Object} Comprehensive solar calendar information
- * @throws {Error} If invalid date provided
+ * @param {Date|number} lunarYearOrDate - Lunar date object OR lunar year
+ * @param {number|boolean} lunarMonthOrLeap - Lunar month (1-12) OR isLeapMonth if format 1
+ * @param {number} [lunarDay] - Lunar day (1-30)
+ * @param {boolean} [isLeapMonth=false] - Whether this is a leap month
+ * @param {number} [hour=0] - Hour (0-23)
+ * @param {number} [minute=0] - Minute (0-59)
+ * @param {number} [second=0] - Second (0-59)
+ * @returns {Object} Comprehensive solar/lunar calendar information
  */
-const lunarToSolar = (lunarDate, isLeapMonth = false) => {
-  if (!isValidDate(lunarDate)) {
-    throw new Error('Invalid date provided');
+const lunarToSolar = (lunarYearOrDate, lunarMonthOrLeap, lunarDayVal, isLeapMonthVal = false, hourVal = 0, minuteVal = 0, secondVal = 0) => {
+  let lunarYear, lunarMonth, lunarDay, isLeapMonth = false, hour = 0, minute = 0, second = 0;
+
+  if (lunarYearOrDate instanceof Date) {
+    lunarYear = lunarYearOrDate.getFullYear();
+    lunarMonth = lunarYearOrDate.getMonth() + 1;
+    lunarDay = lunarYearOrDate.getDate();
+    isLeapMonth = !!lunarMonthOrLeap; // isLeapMonth is the second arg in format 1
+    hour = hourVal;
+    minute = minuteVal;
+    second = secondVal;
+  } else if (typeof lunarYearOrDate === 'number' && lunarMonthOrLeap !== undefined && lunarDayVal !== undefined) {
+    lunarYear = lunarYearOrDate;
+    lunarMonth = lunarMonthOrLeap;
+    lunarDay = lunarDayVal;
+    isLeapMonth = isLeapMonthVal;
+    hour = hourVal;
+    minute = minuteVal;
+    second = secondVal;
+  } else {
+    throw new Error('Invalid input. Use (lunarDate, isLeapMonth) or (year, month, day, isLeapMonth, hour, minute, second)');
   }
 
-  const lunarYear = lunarDate.getFullYear();
-  const lunarMonth = lunarDate.getMonth() + 1;
-  const lunarDay = lunarDate.getDate();
-
-  // Calculate solar date
-  const solarInfo = calculateSolarFromLunar(lunarYear, lunarMonth, lunarDay, isLeapMonth);
+  // Calculate solar information
+  const solarInfo = calculateSolarFromLunar(lunarYear, lunarMonth, lunarDay, isLeapMonth, hour, minute, second);
   const solarDate = new Date(solarInfo.year, solarInfo.month, solarInfo.day);
 
   // Calculate stem-branch information
@@ -742,8 +816,12 @@ const lunarToSolar = (lunarDate, isLeapMonth = false) => {
       year: solarInfo.year,
       month: solarInfo.month + 1,
       day: solarInfo.day,
-      weekDay: DAY_NAMES[solarDate.getDay()],
-      time: null
+      weekDay: DAY_NAMES[new Date(solarInfo.year, solarInfo.month, solarInfo.day).getDay()],
+      time: {
+        hour: solarInfo.hour,
+        minute: solarInfo.minute,
+        second: solarInfo.second
+      }
     },
     lunar: {
       year: lunarYear,
@@ -755,10 +833,22 @@ const lunarToSolar = (lunarDate, isLeapMonth = false) => {
       zodiac: ZODIAC_ANIMALS[(lunarYear - 1900) % 12]
     },
     stemBranch: {
-      year: stemBranchInfo.year,
-      month: stemBranchInfo.month,
-      day: stemBranchInfo.day,
-      time: null
+      year: stemBranchInfo.year.name,
+      month: stemBranchInfo.month.name,
+      day: stemBranchInfo.day.name,
+      time: solarInfo.hour !== undefined ? getTimePeriod(new Date(2000, 0, 1, solarInfo.hour)).branch : null
+    },
+    baZi: {
+      year: { stem: stemBranchInfo.year.stem, branch: stemBranchInfo.year.branch },
+      month: { stem: stemBranchInfo.month.stem, branch: stemBranchInfo.month.branch },
+      day: { stem: stemBranchInfo.day.stem, branch: stemBranchInfo.day.branch },
+      hour: solarInfo.hour !== undefined ? (() => {
+        const tp = getTimePeriod(new Date(2000, 0, 1, solarInfo.hour));
+        return {
+          stem: getHourStem(stemBranchInfo.day.index % 10, EARTHLY_BRANCHES.indexOf(tp.branch)),
+          branch: tp.branch
+        };
+      })() : null
     },
     timePeriod: null,
     festivals: {
