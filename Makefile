@@ -2,7 +2,7 @@
 # ===== Configuration =====
 
 .DEFAULT_GOAL := help
-.PHONY: help install run test test-watch clean
+.PHONY: help install run ui today test test-watch clean
 
 # ===== Helpers =====
 
@@ -19,6 +19,9 @@ install: ## Install project dependencies
 
 run: ## Run the example test runner (run.js)
 	node run.js
+
+ui: ## Launch the test UI in the default browser
+	open test-ui.html
 
 test: ## Run all tests using AVA
 	npm test

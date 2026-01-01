@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YALC - Lunar Calendar Test UI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 25%),
+                radial-gradient(circle at 80% 80%, rgba(245, 158, 11, 0.1) 0%, transparent 25%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff 0%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.4);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .card h2 {
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-glow);
+        }
+
+        .results {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .result-label {
+            color: var(--text-muted);
+        }
+
+        .result-value {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .festival-badge {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--accent);
+        }
+
+        .bazi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .bazi-box {
+            background: rgba(15, 23, 42, 0.4);
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .bazi-title {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        .bazi-content {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .footer {
+            margin-top: 4rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="header">
+            <h1>YALC Library</h1>
+            <p>Yet Another Lunar Calendar - Conversion Playground</p>
+        </header>
+
+        <div class="grid">
+            <!-- Solar to Lunar Card -->
+            <section class="card">
+                <h2><span>📅</span> Solar to Lunar</h2>
+                <div class="input-group">
+                    <label for="solarDate">Solar Date & Time</label>
+                    <input type="datetime-local" id="solarDate">
+                </div>
+                
+                <div class="results" id="solarToLunarResults">
+                    <div class="result-item">
+                        <span class="result-label">Lunar Date</span>
+                        <span class="result-value" id="resLunarDate">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Chinese Zodiac</span>
+                        <span class="result-value" id="resZodiac">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Time Period</span>
+                        <span class="result-value" id="resTimePeriod">-</span>
+                    </div>
+                    
+                    <div class="bazi-grid">
+                        <div class="bazi-box">
+                            <div class="bazi-title">Year</div>
+                            <div class="bazi-content" id="baziYear">-</div>
+                        </div>
+                        <div class="bazi-box">
+                            <div class="bazi-title">Month</div>
+                            <div class="bazi-content" id="baziMonth">-</div>
+                        </div>
+                        <div class="bazi-box">
+                            <div class="bazi-title">Day</div>
+                            <div class="bazi-content" id="baziDay">-</div>
+                        </div>
+                        <div class="bazi-box">
+                            <div class="bazi-title">Hour</div>
+                            <div class="bazi-content" id="baziHour">-</div>
+                        </div>
+                    </div>
+
+                    <div id="solarFestivals" style="margin-top: 1rem;"></div>
+                    <div id="lunarFestivals" style="margin-top: 0.5rem;"></div>
+                </div>
+            </section>
+
+            <!-- Lunar to Solar Card -->
+            <section class="card">
+                <h2><span>🌙</span> Lunar to Solar</h2>
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0;">
+                    <div class="input-group">
+                        <label for="lunarYear">Year</label>
+                        <input type="number" id="lunarYear" min="1900" max="2100" value="2026">
+                    </div>
+                    <div class="input-group">
+                        <label for="lunarMonth">Month</label>
+                        <select id="lunarMonth">
+                            <option value="1">1 (正月)</option>
+                            <option value="2">2 (二月)</option>
+                            <option value="3">3 (三月)</option>
+                            <option value="4">4 (四月)</option>
+                            <option value="5">5 (五月)</option>
+                            <option value="6">6 (六月)</option>
+                            <option value="7">7 (七月)</option>
+                            <option value="8">8 (八月)</option>
+                            <option value="9">9 (九月)</option>
+                            <option value="10">10 (十月)</option>
+                            <option value="11">11 (十一月)</option>
+                            <option value="12">12 (腊月)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0;">
+                    <div class="input-group">
+                        <label for="lunarDay">Day</label>
+                        <input type="number" id="lunarDay" min="1" max="30" value="1">
+                    </div>
+                    <div class="input-group">
+                        <label for="isLeap">Leap Month?</label>
+                        <select id="isLeap">
+                            <option value="false">No</option>
+                            <option value="true">Yes</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="results">
+                    <div class="result-item">
+                        <span class="result-label">Solar Date</span>
+                        <span class="result-value" id="resSolarDate">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Weekday</span>
+                        <span class="result-value" id="resWeekday">-</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <footer class="footer">
+            <p>&copy; 2026 YALC Library. Powered by modern JavaScript.</p>
+        </footer>
+    </div>
+
+    <!-- Load the YALC library -->
+    <script src="yalc.js"></script>
+    <script>
+        // Use the library from the window object
+        const lib = window.LunarCalendarFunctional;
+
+        // Elements
+        const solarInput = document.getElementById('solarDate');
+        const lunarYearInput = document.getElementById('lunarYear');
+        const lunarMonthInput = document.getElementById('lunarMonth');
+        const lunarDayInput = document.getElementById('lunarDay');
+        const isLeapInput = document.getElementById('isLeap');
+
+        // Set default solar date to now
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        solarInput.value = now.toISOString().slice(0, 16);
+
+        function updateSolarToLunar() {
+            try {
+                const date = new Date(solarInput.value);
+                const res = lib.solarToLunar(date);
+                
+                document.getElementById('resLunarDate').textContent = 
+                    `${res.lunar.year} ${res.lunar.monthName}月 ${res.lunar.dayName}`;
+                
+                document.getElementById('resZodiac').innerHTML = 
+                    `${res.lunar.zodiac} <span class="badge">Year Pillar: ${res.stemBranch.year}</span>`;
+                
+                document.getElementById('resTimePeriod').textContent = 
+                    `${res.timePeriod.name} (${res.timePeriod.period})`;
+
+                // BaZi
+                document.getElementById('baziYear').textContent = res.baZi.year.stem + res.baZi.year.branch;
+                document.getElementById('baziMonth').textContent = res.baZi.month.stem + res.baZi.month.branch;
+                document.getElementById('baziDay').textContent = res.baZi.day.stem + res.baZi.day.branch;
+                document.getElementById('baziHour').textContent = res.baZi.hour.stem + res.baZi.hour.branch;
+
+                // Festivals
+                const solFest = document.getElementById('solarFestivals');
+                const lunFest = document.getElementById('lunarFestivals');
+                
+                solFest.innerHTML = res.festivals.solar ? 
+                    `<span class="badge festival-badge">${res.festivals.solar.name} (${res.festivals.solar.english})</span>` : '';
+                
+                lunFest.innerHTML = res.festivals.lunar ? 
+                    `<span class="badge festival-badge">${res.festivals.lunar.name} (${res.festivals.lunar.english})</span>` : '';
+                
+                if (res.festivals.sanniangSha) {
+                    lunFest.innerHTML += `<span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">三娘煞日</span>`;
+                }
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function updateLunarToSolar() {
+            try {
+                const y = parseInt(lunarYearInput.value);
+                const m = parseInt(lunarMonthInput.value);
+                const d = parseInt(lunarDayInput.value);
+                const leap = isLeapInput.value === 'true';
+
+                const res = lib.lunarToSolar(y, m, d, leap);
+                
+                document.getElementById('resSolarDate').textContent = 
+                    `${res.solar.year}-${String(res.solar.month).padStart(2, '0')}-${String(res.solar.day).padStart(2, '0')}`;
+                
+                document.getElementById('resWeekday').textContent = `星期${res.solar.weekDay}`;
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // Listeners
+        solarInput.addEventListener('input', updateSolarToLunar);
+        lunarYearInput.addEventListener('input', updateLunarToSolar);
+        lunarMonthInput.addEventListener('change', updateLunarToSolar);
+        lunarDayInput.addEventListener('input', updateLunarToSolar);
+        isLeapInput.addEventListener('change', updateLunarToSolar);
+
+        // Initial update
+        updateSolarToLunar();
+        updateLunarToSolar();
+    </script>
+</body>
+</html>
