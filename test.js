@@ -1,25 +1,25 @@
 /**
  * AVA Test Suite for YALC (Yet Another Lunar Calendar Converter)
- * 
+ *
  * HOW TO RUN TESTS:
  * -----------------
  * 1. Install AVA if not already installed:
  *    npm install --save-dev ava
- * 
+ *
  * 2. Run all tests:
  *    npm test
  *    or
  *    npx ava
- * 
+ *
  * 3. Run tests in watch mode (auto-rerun on changes):
  *    npx ava --watch
- * 
+ *
  * 4. Run specific test file:
  *    npx ava test.js
- * 
+ *
  * 5. Run tests with verbose output:
  *    npx ava --verbose
- * 
+ *
  * WHAT THESE TESTS COVER:
  * ------------------------
  * - Solar to Lunar conversions for known dates
@@ -231,7 +231,7 @@ test('Lunar day names: Special formatting for specific days', t => {
   const result1 = solarToLunar(new Date('2020-01-25')); // CNY 2020
   t.is(result1.lunar.dayName, '初一', 'First day should be 初一');
 
-  // Test 10th day  
+  // Test 10th day
   const result10 = solarToLunar(new Date('2020-02-03'));
   t.is(result10.lunar.dayName, '初十', '10th day should be 初十');
 
@@ -331,23 +331,41 @@ test('BaZi: Verify Four Pillars (Year, Month, Day, Hour)', t => {
   const result = solarToLunar(date);
 
   // Year pillar
-  t.is(result.baZi.year.stem, '庚', 'Year stem should be Geng (庚)');
-  t.is(result.baZi.year.branch, '子', 'Year branch should be Zi (子)');
+  // 2020-01-25 is BEFORE Li Chun (Feb 4), so it belongs to previous Year Pillar (Ji Hai - 2019)
+  // 2019 = Ji Hai (己亥)
+  t.is(result.baZi.year.stem, '己', 'Year stem should be Ji (己) - Pre-Li Chun');
+  t.is(result.baZi.year.branch, '亥', 'Year branch should be Hai (亥) - Pre-Li Chun');
 
   // Day pillar
   t.is(result.baZi.day.stem, '丁', 'Day stem should be Ding (丁)');
   t.is(result.baZi.day.branch, '卯', 'Day branch should be Mao (卯)');
 
-  // Hour pillar (newly implemented)
   t.is(result.baZi.hour.stem, '丙', 'Hour stem for Ding Day + Wu Hour should be Bing (丙)');
   t.is(result.baZi.hour.branch, '午', 'Hour branch should be Wu (午)');
+});
+
+test('BaZi: Regression - Month Pillar for 1980-03-21 should be Ji-Mao (date after Jing Zhe)', t => {
+  // 1980-03-21 is in 2nd Solar Month (Rabbit), but 2nd Lunar Month started Feb 16.
+  // Previous bug calculated it as 1st Solar Month because math used Lunar Month index.
+  const date = new Date('1980-03-21T13:30:00');
+  const result = solarToLunar(date);
+
+  // Year: Geng-Shen (Monkey) - 1980
+  t.is(result.baZi.year.stem + result.baZi.year.branch, '庚申', 'Year should be Geng-Shen');
+
+  // Month: Ji-Mao (Rabbit) - 2nd Solar Month
+  // Incorrect buggy value was Wu-Yin (Tiger)
+  t.is(result.baZi.month.stem + result.baZi.month.branch, '己卯', 'Month should be Ji-Mao (Correct Solar Month)');
+
+  // Day: Gui-Si (Snake)
+  t.is(result.baZi.day.stem + result.baZi.day.branch, '癸巳', 'Day should be Gui-Si');
 });
 
 
 test('Flexible Input: solarToLunar with numerical arguments', t => {
   // 2024-12-28 15:45:30
   const result = solarToLunar(2024, 12, 28, 15, 45, 30);
-  
+
   t.is(result.solar.year, 2024);
   t.is(result.solar.month, 12);
   t.is(result.solar.day, 28);
@@ -359,7 +377,7 @@ test('Flexible Input: solarToLunar with numerical arguments', t => {
 test('Flexible Input: lunarToSolar with numerical arguments and time', t => {
   // Lunar 2025-11-9 12:30:00
   const result = lunarToSolar(2025, 11, 9, false, 12, 30, 0);
-  
+
   t.is(result.lunar.year, 2025);
   t.is(result.lunar.month, 11);
   t.is(result.lunar.day, 9);

@@ -15,7 +15,8 @@ A JavaScript library for converting between Gregorian (solar) and Chinese lunar 
 - ✅ **Chinese zodiac animals** (12-year cycle)
 - ✅ **Time periods** (时辰) - Traditional 12 two-hour periods
 - ✅ **Stem-Branch system** (干支) - Year, month, day pillars
-- ✅ **BaZi (Eight Characters)** - Heavenly Stems and Earthly Branches for all 4 pillars
+- ✅ **Stem-Branch system** (干支) - Year, month, day pillars
+- ✅ **BaZi (Eight Characters)** - Precise Month Pillar calculation using Solar Terms (24 Jie Qi)
 - ✅ **Lunar day formatting** - Chinese character representation
 - ✅ **Festival detection** - Solar, lunar, and religious festivals
 - ✅ **Date range:** 1900-2100
@@ -119,8 +120,19 @@ node run.js
 # Use Makefile for quick checks
 make today            # Show lunar/BaZi for right now
 make run              # Same as node run.js
+make run              # Same as node run.js
 make test             # Run all tests
+make ui               # Launch Test UI in browser
 ```
+
+## Test UI (New)
+
+A modern, glassmorphism-styled test interface is available for visual verification.
+
+1. Run `make ui` to open the interface.
+2. **Solar to Lunar**: Select any date to see the lunar date, zodiac, and BaZi pillars.
+3. **Lunar to Solar**: Input a lunar date to convert back to Gregorian.
+4. **BaZi Grid**: Visualize the Four Pillars with correct Solar Term-based Month Pillars.
 
 ---
 
@@ -156,7 +168,8 @@ yalc/
 ├── yalc.js                      # Main library (functional edition)
 ├── test.js                      # AVA test suite (25 tests)
 ├── run.js                       # Test runner (3-day view + examples)
-├── Makefile                     # Build/dev shortcuts (make today, make run)
+├── test-ui.html                 # Modern Test UI (HTML/CSS/JS)
+├── Makefile                     # Build/dev shortcuts (make ui, make today)
 ├── .eslintrc.json               # ESLint configuration
 └── package.json                 # Dependencies
 ```

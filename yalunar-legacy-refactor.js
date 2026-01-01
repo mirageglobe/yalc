@@ -1,6 +1,6 @@
 /**
  * YALC - Yet Another Lunar Calendar Converter
- * 
+ *
  * @author Jimmy Lim (mirageglobe@gmail.com)
  * @version 2.0.0
  */
@@ -13,7 +13,7 @@ class LunarCalendar {
   /**
    * Initialize all constant data used for lunar calendar calculations
    */
-  
+
   initializeConstants() {
     // Lunar calendar data from 1900-2049
     // Each hex value encodes month lengths and leap month info
@@ -70,7 +70,7 @@ class LunarCalendar {
 
     const normalizedDate = new Date(solarDate.getFullYear(), solarDate.getMonth(), solarDate.getDate());
     const lunarInfo = this.calculateLunarDate(normalizedDate);
-    
+
     return this.createCalendarInfo({
       solarDate: normalizedDate,
       lunarInfo: lunarInfo,
@@ -114,7 +114,7 @@ class LunarCalendar {
     const dayOffset = Math.round((solarDate.valueOf() - this.baseDateValue) / this.millisecondsPerDay);
     let totalDays = dayOffset;
     let year = 1900;
-    
+
     // Find the lunar year
     while (year < 2050 && totalDays > 0) {
       const yearDays = this.getLunarYearDays(year);
@@ -135,7 +135,7 @@ class LunarCalendar {
 
     while (month <= 12 && totalDays > 0) {
       let monthDays;
-      
+
       // Handle leap month
       if (leapMonth > 0 && month === leapMonth + 1 && !isLeapMonth) {
         month--;
@@ -146,9 +146,9 @@ class LunarCalendar {
       }
 
       if (totalDays < monthDays) break;
-      
+
       totalDays -= monthDays;
-      
+
       if (isLeapMonth) {
         isLeapMonth = false;
       }
@@ -186,7 +186,7 @@ class LunarCalendar {
     const lunarYear = lunarDate.getFullYear();
     const lunarMonth = lunarDate.getMonth() + 1;
     const lunarDay = lunarDate.getDate();
-    
+
     let totalDays = 0;
 
     // Add days for complete years
@@ -211,7 +211,7 @@ class LunarCalendar {
     totalDays += lunarDay - 1;
 
     const solarDate = new Date(this.baseDateValue + totalDays * this.millisecondsPerDay);
-    
+
     return {
       year: solarDate.getFullYear(),
       month: solarDate.getMonth(),
@@ -240,7 +240,7 @@ class LunarCalendar {
         day: solarDay,
         weekDay: weekDay
       },
-      
+
       // Lunar calendar info
       lunar: {
         year: lunarInfo.year,
@@ -251,14 +251,14 @@ class LunarCalendar {
         dayName: this.formatLunarDay(lunarInfo.day),
         zodiac: this.zodiacAnimals[(lunarInfo.year - 1900) % 12]
       },
-      
+
       // Chinese stem-branch calendar
       stemBranch: {
         year: stemBranchInfo.year,
         month: stemBranchInfo.month,
         day: stemBranchInfo.day
       },
-      
+
       // Additional information
       solarTerms: this.getSolarTerm(solarYear, solarMonth, solarDay),
       festivals: this.getFestivals(solarYear, solarMonth + 1, solarDay, lunarInfo)
@@ -272,12 +272,12 @@ class LunarCalendar {
   getLunarYearDays(year) {
     let totalDays = 348; // Base days (12 months × 29 days)
     const yearInfo = this.lunarInfo[year - 1900];
-    
+
     // Add extra days for big months (30 days instead of 29)
     for (let i = 0x8000; i > 0x8; i >>= 1) {
       totalDays += (yearInfo & i) ? 1 : 0;
     }
-    
+
     return totalDays + this.getLeapMonthDays(year);
   }
 
@@ -288,7 +288,7 @@ class LunarCalendar {
   getLeapMonthDays(year) {
     const leapMonth = this.getLeapMonth(year);
     if (leapMonth === 0) return 0;
-    
+
     const yearInfo = this.lunarInfo[year - 1900];
     return (yearInfo & 0x10000) ? 30 : 29;
   }
@@ -332,7 +332,7 @@ class LunarCalendar {
     // Simplified stem-branch calculation
     const yearStemBranch = this.getStemBranch(year - 1900 + 36);
     const monthStemBranch = this.getStemBranch((year - 1900) * 12 + month + 12);
-    
+
     // Day calculation based on days since epoch
     const dayOffset = Math.floor(Date.UTC(year, month, day) / this.millisecondsPerDay) + 25567 + 10;
     const dayStemBranch = this.getStemBranch(dayOffset + day - 1);

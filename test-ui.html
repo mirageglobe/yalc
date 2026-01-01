@@ -27,7 +27,7 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg);
-            background-image: 
+            background-image:
                 radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 25%),
                 radial-gradient(circle at 80% 80%, rgba(245, 158, 11, 0.1) 0%, transparent 25%);
             color: var(--text);
@@ -233,7 +233,7 @@
                     <label for="solarDate">Solar Date & Time</label>
                     <input type="datetime-local" id="solarDate">
                 </div>
-                
+
                 <div class="results" id="solarToLunarResults">
                     <div class="result-item">
                         <span class="result-label">Lunar Date</span>
@@ -247,7 +247,7 @@
                         <span class="result-label">Time Period</span>
                         <span class="result-value" id="resTimePeriod">-</span>
                     </div>
-                    
+
                     <div class="bazi-grid">
                         <div class="bazi-box">
                             <div class="bazi-title">Year</div>
@@ -352,14 +352,14 @@
             try {
                 const date = new Date(solarInput.value);
                 const res = lib.solarToLunar(date);
-                
-                document.getElementById('resLunarDate').textContent = 
+
+                document.getElementById('resLunarDate').textContent =
                     `${res.lunar.year} ${res.lunar.monthName}月 ${res.lunar.dayName}`;
-                
-                document.getElementById('resZodiac').innerHTML = 
+
+                document.getElementById('resZodiac').innerHTML =
                     `${res.lunar.zodiac} <span class="badge">Year Pillar: ${res.stemBranch.year}</span>`;
-                
-                document.getElementById('resTimePeriod').textContent = 
+
+                document.getElementById('resTimePeriod').textContent =
                     `${res.timePeriod.name} (${res.timePeriod.period})`;
 
                 // BaZi
@@ -371,13 +371,13 @@
                 // Festivals
                 const solFest = document.getElementById('solarFestivals');
                 const lunFest = document.getElementById('lunarFestivals');
-                
-                solFest.innerHTML = res.festivals.solar ? 
+
+                solFest.innerHTML = res.festivals.solar ?
                     `<span class="badge festival-badge">${res.festivals.solar.name} (${res.festivals.solar.english})</span>` : '';
-                
-                lunFest.innerHTML = res.festivals.lunar ? 
+
+                lunFest.innerHTML = res.festivals.lunar ?
                     `<span class="badge festival-badge">${res.festivals.lunar.name} (${res.festivals.lunar.english})</span>` : '';
-                
+
                 if (res.festivals.sanniangSha) {
                     lunFest.innerHTML += `<span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">三娘煞日</span>`;
                 }
@@ -395,10 +395,10 @@
                 const leap = isLeapInput.value === 'true';
 
                 const res = lib.lunarToSolar(y, m, d, leap);
-                
-                document.getElementById('resSolarDate').textContent = 
+
+                document.getElementById('resSolarDate').textContent =
                     `${res.solar.year}-${String(res.solar.month).padStart(2, '0')}-${String(res.solar.day).padStart(2, '0')}`;
-                
+
                 document.getElementById('resWeekday').textContent = `星期${res.solar.weekDay}`;
             } catch (e) {
                 console.error(e);
