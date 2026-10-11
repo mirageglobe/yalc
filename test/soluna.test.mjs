@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { test } from 'node:test';
 
@@ -583,9 +584,15 @@ test('BaZi: year pillar uses prior year on day before Li Chun (2024-02-02 → �
   assert.strictEqual(result.baZi.year.stem + result.baZi.year.branch, '癸卯');
 });
 
-test('BaZi: year pillar advances on Li Chun (2024-02-03 → 甲辰)', () => {
-  const result = solarToLunar(new Date(2024, 1, 3));
+test('BaZi: year pillar advances on Li Chun (2024-02-04 → 甲辰; Li Chun 2024 is Feb 4 in the Hong Kong Observatory table)', () => {
+  const result = solarToLunar(new Date(2024, 1, 4));
   assert.strictEqual(result.baZi.year.stem + result.baZi.year.branch, '甲辰');
+});
+
+test('BaZi: the day before Li Chun 2024 is still the prior year (2024-02-03 → 癸卯)', () => {
+  // the earlier formula put Li Chun 2024 on Feb 3, a day early
+  const result = solarToLunar(new Date(2024, 1, 3));
+  assert.strictEqual(result.baZi.year.stem + result.baZi.year.branch, '癸卯');
 });
 
 test('BaZi: Jan 1 year pillar is always prior year (2024-01-01 → 癸卯)', () => {
@@ -966,4 +973,18 @@ test('Day pillar: every day from 1900-02-01 to 1970-02-01 has a pillar, each one
     }
     prev = { stem, branch };
   }
+});
+
+// ===== SOLAR TERM DATES AGAINST THE HONG KONG OBSERVATORY =====
+
+test('Solar terms: all 24 term dates for every year 1901-2100 match the Hong Kong Observatory tables', () => {
+  const { years } = JSON.parse(readFileSync(new URL('./fixtures/hko-solar-terms.json', import.meta.url), 'utf8'));
+  const wrong = [];
+  for (const [year, dates] of Object.entries(years)) {
+    getSolarTermsForYear(Number(year)).forEach((t, k) => {
+      const ours = `${String(t.month).padStart(2, '0')}-${String(t.day).padStart(2, '0')}`;
+      if (ours !== dates[k]) wrong.push(`${year} ${t.nameZh}: ${ours} vs ${dates[k]}`);
+    });
+  }
+  assert.deepStrictEqual(wrong, []);
 });
