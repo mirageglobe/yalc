@@ -781,6 +781,9 @@ const getSolarTermsForYear = (year) =>
  * @param {number} day - Gregorian day
  * @returns {Object} Stem-branch for year, month, and day
  */
+// positive modulo: JS `%` keeps the sign of the dividend, so dates before the anchor gave a negative index and an empty pillar
+const wrapIndex = (n, size) => ((n % size) + size) % size;
+
 const calculateStemBranch = (year, month, day) => {
   // Year pillar changes at Li Chun (Start of Spring, term index 2), not Jan 1
   let yearForStem = year;
@@ -788,7 +791,7 @@ const calculateStemBranch = (year, month, day) => {
   if (month === 0 || (month === 1 && day < liChunDay)) {
     yearForStem--;
   }
-  const yearIdx = (yearForStem - 1900 + 36) % 60;
+  const yearIdx = wrapIndex(yearForStem - 1900 + 36, 60);
 
   // Month pillar is defined by the 12 Jie sectional terms (even indices: 0, 2, 4, ...)
   // Each Jie falls in the same Gregorian month; if before the term, use the prior solar month.
@@ -800,13 +803,13 @@ const calculateStemBranch = (year, month, day) => {
   if (day < termDay) {
     totalMonths--;
   }
-  const monthIdx = totalMonths % 60;
+  const monthIdx = wrapIndex(totalMonths, 60);
 
   // Day stem-branch
   // +17 anchors the sexagenary day cycle: 2000-01-01 = 戊午 (index 54), 2000-01-07 = 甲子 (index 0),
   // matching the Hong Kong Observatory almanac. (the earlier +33 / 甲戌 anchor was off by 16.)
   const dayOffset = Math.floor(Date.UTC(year, month, day) / MILLISECONDS_PER_DAY) + 17;
-  const dayIdx = dayOffset % 60;
+  const dayIdx = wrapIndex(dayOffset, 60);
 
   return {
     year: {

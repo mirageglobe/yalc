@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Day pillar was empty before 1970-01-01 minus 17 days (about 1969-12-15).** The stem-branch index used JS `%`, which keeps the sign of the dividend, so earlier dates produced a negative index and `baZi.day` came back as `{}` (the hour pillar built on it too). The year, month and day indexes now use a non-negative modulo. Tests cover every day from 1900-02-01 to 1970-02-01 (each pillar one place after the last) and the anchors 1949-10-01 = 甲子 and 1969-12-15 = 甲子.
+
 ---
 
 ## [2.6.1] - 2026-07-25
