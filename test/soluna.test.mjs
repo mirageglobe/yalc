@@ -934,3 +934,36 @@ test('Day pillar: advances exactly one cycle position per calendar day over 60 d
   }
   assert.strictEqual(seen.size, 60, 'a 60-day span should cover every cycle index exactly once');
 });
+
+// ===== DAY PILLAR BEFORE 1970 =====
+
+const STEMS = '甲乙丙丁戊己庚辛壬癸';
+const BRANCHES = '子丑寅卯辰巳午未申酉戌亥';
+
+test('Day pillar: known anchors before 1970 (1949-10-01 = 甲子, 1969-12-15 = 甲子)', () => {
+  const day = (iso) => solarToLunar(new Date(`${iso}T12:00:00`)).baZi.day;
+  assert.deepStrictEqual(day('1949-10-01'), { stem: '甲', branch: '子' });
+  assert.deepStrictEqual(day('1969-12-15'), { stem: '甲', branch: '子' });
+});
+
+test('Day pillar: never empty and steps one place a day across 1969-12-15 (the old negative modulo gap)', () => {
+  const day = (iso) => solarToLunar(new Date(`${iso}T12:00:00`)).baZi.day;
+  assert.deepStrictEqual(day('1969-12-14'), { stem: '癸', branch: '亥' });
+  assert.deepStrictEqual(day('1969-12-13'), { stem: '壬', branch: '戌' });
+  assert.deepStrictEqual(day('1969-12-16'), { stem: '乙', branch: '丑' });
+});
+
+test('Day pillar: every day from 1900-02-01 to 1970-02-01 has a pillar, each one place after the last', () => {
+  let prev = null;
+  for (let t = Date.UTC(1900, 1, 1); t <= Date.UTC(1970, 1, 1); t += 86400000) {
+    const d = new Date(t + 12 * 3600000);
+    const { stem, branch } = solarToLunar(new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 12)).baZi.day;
+    const iso = d.toISOString().slice(0, 10);
+    assert.ok(STEMS.includes(stem) && BRANCHES.includes(branch), `${iso} has no day pillar`);
+    if (prev) {
+      assert.strictEqual(STEMS.indexOf(stem), (STEMS.indexOf(prev.stem) + 1) % 10, `${iso} stem`);
+      assert.strictEqual(BRANCHES.indexOf(branch), (BRANCHES.indexOf(prev.branch) + 1) % 12, `${iso} branch`);
+    }
+    prev = { stem, branch };
+  }
+});
