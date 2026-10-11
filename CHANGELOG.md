@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+---
+
+## [2.6.2] - 2026-10-11
+
 ### Changed
 
 - **Solar term dates are now computed from the sun's position instead of a ±1 day formula.** The apparent ecliptic longitude (Meeus, Astronomical Algorithms ch. 25) is solved by bisection for each 15-degree crossing, and the date is the Beijing (UTC+8) calendar date. A golden test checks all 24 terms for every year 1901-2100 against the Hong Kong Observatory tables (the old formula matched about 55 percent; now 100 percent, with 16 near-midnight cases in a fix list). This moves year and month pillar boundaries on the days where the old formula was a day off, for example 立春 2024 is Feb 4, not Feb 3.
