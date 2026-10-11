@@ -104,9 +104,9 @@ both `solarToLunar` and `lunarToSolar` return the same structure:
 
 ### solar term day calculation
 
-`day = floor(yearSuffix × 0.2422 + C) − floor(yearSuffix / 4)`
+a solar term is the moment the sun's apparent ecliptic longitude crosses a multiple of 15 degrees (小寒 285, 大寒 300, 立春 315 ... 冬至 270). the longitude comes from the low-accuracy series in Meeus, *Astronomical Algorithms* ch. 25 (about 0.01 degrees, a few minutes of time), and a bisection finds each crossing within a 12-day window. the term's date is the Beijing (UTC+8) calendar date of that instant, the same convention as the Hong Kong Observatory tables.
 
-where `C` is a century-specific constant from `SOLAR_TERM_INFO`. max deviation ~1 day; sufficient for pillar boundary detection. astronomical-precision would require VSOP87.
+a term within about 12 minutes of midnight can land on the wrong side, so the 16 such cases in 1901-2100 are corrected in `SOLAR_TERM_FIXES`. the golden test (`test/fixtures/hko-solar-terms.json`) checks all 24 terms for every year 1901-2100 against the Observatory tables: the algorithm alone matches 4784 of 4800 dates, the 16 fixes make it 4800 of 4800. 1900 has no Observatory table; it uses the algorithm alone. results are cached per year and term.
 
 ### 子时 boundary
 
@@ -188,7 +188,7 @@ no workflow publishes: publish to npm by hand after the tag (needs the npm login
 | single-file library | `soluna.js` for all code | library is self-contained domain math with no external dependencies; splitting would add indirection without benefit at this scale |
 | lookup table for lunar data | `LUNAR_INFO` hex array | precomputed data from established sources (1900–2100); astronomical recalculation would be far more complex and error-prone for a utility library |
 | functional paradigm | pure functions, no mutation | easier unit testing; each conversion step is independently verifiable; immutable inputs prevent subtle date mutation bugs |
-| solar term approximation | simplified formula (±1 day) | acceptable for pillar boundary detection; VSOP87 is overkill for this use case |
+| solar term calculation | sun longitude (Meeus ch. 25) with bisection, plus a 16-entry fix list | matches the Hong Kong Observatory dates for 1901-2100 (the old ±1 day formula matched about 55 percent); a full VSOP87 series is not needed for date-level pillar boundaries |
 | dual export | CommonJS + browser global | maximises compatibility without a build step or bundler dependency |
 | linter | Biome over ESLint | single devDependency, zero config overhead, handles lint + format + import sorting; ESLint plugin ecosystem not needed for plain JS |
 | test runner | node:test over AVA | zero devDependencies; built into Node 22+; sufficient for pure synchronous computation tests |
@@ -217,7 +217,7 @@ no workflow publishes: publish to npm by hand after the tag (needs the npm login
 - [ ] `[soluna]` fix npm publish files list: `package.json` `files` references `LICENSE`, actual file is `LICENSE.md`, so license text is silently omitted from the published npm package `[easy]`
 - [ ] `[soluna]` remove dead `.eslintrc.json`: leftover from before the Biome switch, no eslint devDependency, unused by CI or Makefile `[easy]`
 - [ ] `[soluna]` cut a patch release for the day-pillar epoch fix: `[Unreleased]` in CHANGELOG.md has the fix already merged to main, but `package.json` and the latest tag are still at 2.6.0, so npm installs still get the wrong day/hour pillars `[easy]`
-- [ ] `[soluna]` higher-precision solar terms: replace the ±1 day formula (or extend `SOLAR_TERM_INFO` past 2099) with VSOP87-derived or precomputed term dates, since 立春/节 boundaries set the year and month pillars; add golden-data tests against known 立春 dates `[hard]`
+- [x] `[soluna]` higher-precision solar terms (done on this branch: sun-longitude calculation, golden test against the Observatory tables; release and re-vendor still to do; time-of-day precision is still about 12 minutes, so a sub-minute series is a later idea): replace the ±1 day formula (or extend `SOLAR_TERM_INFO` past 2099) with VSOP87-derived or precomputed term dates, since 立春/节 boundaries set the year and month pillars; add golden-data tests against known 立春 dates `[hard]`
 - [x] `[soluna]` moon phase (月相) — astronomical primitive derived from lunar day `[medium]`
 
 ### ideas

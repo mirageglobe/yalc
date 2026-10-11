@@ -346,23 +346,6 @@ const filterFestival = (festival, traditions) => {
  */
 const SANNIANG_SHA_DAYS = [3, 7, 13, 18, 22, 27];
 
-/**
- * Solar Term constants for calculation
- * Base D constant for 20th century (1900-1999) and 21st century (2000-2099)
- * Used in formula: D = (Year - 1900) * 0.2422 + C
- */
-const SOLAR_TERM_INFO = [
-  // 小寒, 大寒, 立春, 雨水, 惊蛰, 春分, 清明, 谷雨, 立夏, 小满, 芒种, 夏至, 小暑, 大暑, 立秋, 处暑, 白露, 秋分, 寒露, 霜降, 立冬, 小雪, 大雪, 冬至
-  [
-    5.4055, 20.12, 3.87, 18.73, 5.63, 20.646, 4.81, 20.1, 5.52, 21.04, 5.678, 21.37, 7.108, 22.83, 7.5, 23.13, 7.646,
-    23.042, 8.318, 23.438, 7.438, 22.36, 7.18, 21.94
-  ], // 1900-1999
-  [
-    5.4055, 20.12, 4.15, 18.73, 5.63, 20.646, 5.11, 20.1, 5.52, 21.04, 5.678, 21.37, 7.108, 22.83, 7.5, 23.13, 7.646,
-    23.042, 8.318, 23.438, 7.438, 22.36, 7.18, 21.94
-  ] // 2000-2099 (Adjusted slightly)
-];
-
 const SOLAR_TERM_NAMES = [
   '小寒',
   '大寒',
@@ -736,23 +719,81 @@ const calculateSolarFromLunar = (
 };
 
 /**
- * Calculate the date (day of month) for a specific solar term
+ * Solar term dates from the sun's position.
  *
- * Formula: int( (Y * D) + C ) - L
- * Y = year suffix (last 2 digits), D = 0.2422, C = constant from SOLAR_TERM_INFO, L = int(Y/4)
- * Covers 1900-2100 with ≤1 day deviation; production use would need VSOP87.
+ * A solar term is the moment the sun's apparent ecliptic longitude crosses a multiple of 15 degrees
+ * (小寒 285, 大寒 300, 立春 315 ... 冬至 270). The longitude comes from the low-accuracy series in
+ * Meeus, Astronomical Algorithms ch. 25 (about 0.01 degrees, so a few minutes of time), and a bisection
+ * finds each crossing. The date is the Beijing (UTC+8) calendar date of that instant, the same
+ * convention as the Hong Kong Observatory tables.
+ *
+ * A term within about 12 minutes of midnight can land on the wrong side. The 16 such cases in
+ * 1901-2100 (checked against the Observatory tables, see the golden test) are corrected in SOLAR_TERM_FIXES.
+ */
+const RADIANS = Math.PI / 180;
+const BEIJING_OFFSET_MS = 8 * 3600000;
+
+// day-of-month corrections where the instant falls within minutes of midnight: { year: { termIndex: day } }
+const SOLAR_TERM_FIXES = {
+  1912: { 18: 9, 21: 23 },
+  1913: { 17: 24 },
+  1923: { 3: 19 },
+  1927: { 16: 8 },
+  1928: { 11: 21 },
+  1950: { 7: 20 },
+  1951: { 23: 23 },
+  1979: { 1: 21 },
+  2014: { 4: 6 },
+  2016: { 12: 7 },
+  2045: { 12: 7 },
+  2047: { 4: 6 },
+  2051: { 5: 20 },
+  2082: { 1: 20 },
+  2097: { 8: 5 }
+};
+
+const wrapDegrees = (d) => ((d % 360) + 360) % 360;
+
+/** Apparent ecliptic longitude of the sun in degrees at a Unix time in ms (UT used as TT, a sub-minute effect). */
+const sunApparentLongitude = (ms) => {
+  const T = (ms / MILLISECONDS_PER_DAY + 2440587.5 - 2451545) / 36525;
+  const meanLongitude = 280.46646 + 36000.76983 * T + 0.0003032 * T * T;
+  const M = (357.52911 + 35999.05029 * T - 0.0001537 * T * T) * RADIANS;
+  const centre =
+    (1.914602 - 0.004817 * T - 0.000014 * T * T) * Math.sin(M) +
+    (0.019993 - 0.000101 * T) * Math.sin(2 * M) +
+    0.000289 * Math.sin(3 * M);
+  const omega = (125.04 - 1934.136 * T) * RADIANS;
+  return wrapDegrees(meanLongitude + centre - 0.00569 - 0.00478 * Math.sin(omega));
+};
+
+const solarTermDayCache = new Map();
+
+/**
+ * Calculate the date (day of month, Beijing time) for a specific solar term
  *
  * @param {number} year - Gregorian year
- * @param {number} termIndex - Index of solar term (0-23)
+ * @param {number} termIndex - Index of solar term (0-23, 小寒 first)
  * @returns {number} Day of the month
  */
 const getSolarTermDay = (year, termIndex) => {
-  // SOLAR_TERM_INFO holds two calibrated blocks: 1900-1999 and 2000-2099.
-  // year 2100 (the table's upper bound) reuses the 2000-2099 block, within the documented ±1 day caveat.
-  const centuryIdx = Math.min(year < 2000 ? 0 : 1, SOLAR_TERM_INFO.length - 1);
-  const yearSuffix = year % 100;
-  const c = SOLAR_TERM_INFO[centuryIdx][termIndex];
-  return Math.floor(yearSuffix * 0.2422 + c) - Math.floor(yearSuffix / 4);
+  const fix = SOLAR_TERM_FIXES[year]?.[termIndex];
+  if (fix) return fix;
+  const key = year * 100 + termIndex;
+  if (solarTermDayCache.has(key)) return solarTermDayCache.get(key);
+  const target = wrapDegrees(285 + 15 * termIndex);
+  // the crossing lies within 6 days of 5 January plus 15.2184 days per term; bisect the signed angle to the target
+  let lo = Date.UTC(year, 0, 5) + (termIndex * 15.2184 - 6) * MILLISECONDS_PER_DAY;
+  let hi = lo + 12 * MILLISECONDS_PER_DAY;
+  for (let i = 0; i < 50; i++) {
+    const mid = (lo + hi) / 2;
+    const angle = ((sunApparentLongitude(mid) - target + 540) % 360) - 180;
+    if (angle < 0) lo = mid;
+    else hi = mid;
+  }
+  const day = new Date((lo + hi) / 2 + BEIJING_OFFSET_MS).getUTCDate();
+  solarTermDayCache.set(key, day);
+  return day;
 };
 
 /**

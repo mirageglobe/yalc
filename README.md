@@ -128,7 +128,7 @@ cny.festivals.lunar
 
 **Month pillar** — the BaZi month pillar uses the Jie sectional solar term date, not the Gregorian month edge, so dates near the boundary may differ from naive implementations.
 
-**Precision** — the solar term formula covers 1900–2100 with ≤1 day deviation. VSOP87 would be needed for sub-day precision.
+**Precision** - solar term dates are computed from the sun's position and match the Hong Kong Observatory tables for every year 1901-2100 (checked by a golden test). The instant is accurate to about 12 minutes; pillar changes happen by date, not time of day.
 
 ---
 
