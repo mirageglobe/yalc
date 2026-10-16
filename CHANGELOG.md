@@ -33,18 +33,11 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Input validation: `solarToLunar` and `lunarToSolar` now throw a `RangeError` for years outside the supported 1900-2100 range, and for out-of-range month/day arguments, instead of silently returning incorrect dates
 - Day pillar golden-data tests cross-checked against the Hong Kong Observatory almanac, plus a 60-day continuity test guarding the day-cycle epoch against off-by-N regressions
+- `moonPhase` field in `solarToLunar` and `lunarToSolar` output — `{ name, nameZh }` derived from the lunar day, covering all 8 standard phases (朔, 娥眉月, 上弦月, 盈凸月, 望, 亏凸月, 下弦月, 残月)
 
 ### Removed
 
 - Dead code: unused `adjustForTimeZodiac` helper and the unread `dayOffset` field on `TIME_PERIODS`; the 子时 (23:00) day rollover is handled inline in `solarToLunar`
-
----
-
-## [2.7.0] - 2026-05-04
-
-### Added
-
-- `moonPhase` field in `solarToLunar` and `lunarToSolar` output — `{ name, nameZh }` derived from the lunar day, covering all 8 standard phases (朔, 娥眉月, 上弦月, 盈凸月, 望, 亏凸月, 下弦月, 残月)
 
 ---
 
